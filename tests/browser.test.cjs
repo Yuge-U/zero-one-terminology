@@ -71,6 +71,31 @@ test('browser: legacy data, favorites, quiz history, reload and account-isolated
     await page.setViewportSize({width:390,height:844});
 
     await page.locator('.term').first().click();
+    await page.getByRole('button',{name:/次の用語/}).click();
+    assert.equal(await page.evaluate(()=>selected),'GBT-0002');
+    await page.getByRole('button',{name:/前の用語/}).click();
+    assert.equal(await page.evaluate(()=>selected),'GBT-0001');
+    await page.locator('[data-cat="DEFENSE"]').click();
+    assert.equal(await page.evaluate(()=>selected),null);
+    assert.equal(await page.locator('#app').evaluate(el=>el.classList.contains('show')),false);
+    await page.locator('[data-cat="ALL"]').click();
+    await page.locator('#q').fill('Pick and roll');
+    await page.locator('.term').first().click();
+    await page.locator('[data-motion-step="1"]').click();
+    assert.match(await page.locator('.diagram-caption').textContent(),/スクリーン/);
+    await page.screenshot({path:path.join(root,'..','outputs','diagram-pick-roll-mobile.png'),fullPage:true});
+    await page.setViewportSize({width:1280,height:900});
+    for(const name of ['Help side','Drop','Eurostep','Bank shot','Points per possession']){
+      await page.evaluate(name=>show(DATA.find(t=>t['正式/標準用語']===name).ID),name);
+      assert.equal(await page.locator('#motionDiagram').evaluate(el=>el.scrollWidth<=el.clientWidth),true);
+      const next=page.locator('[data-motion-step="1"]');if(await next.count())await next.click();
+      await page.locator('#motionDiagram').screenshot({path:path.join(root,'..','outputs','diagram-'+name.replaceAll(' ','-')+'.png')});
+    }
+    await page.setViewportSize({width:390,height:844});
+    await page.locator('[data-cat="COURT"]').click();
+    assert.equal(await page.locator('#q').inputValue(),'');
+    await page.locator('[data-cat="ALL"]').click();
+    await page.locator('.term').first().click();
     await page.evaluate(()=>{const NativeAudio=window.Audio;window.Audio=function(src){const player=new NativeAudio(src);window.testPronunciation=player;return player}});
     await page.getByRole('button',{name:'▶ 英語の発音を聞く',exact:true}).click();
     await page.waitForFunction(()=>window.testPronunciation && window.testPronunciation.currentTime>0);
