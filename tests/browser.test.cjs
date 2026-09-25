@@ -25,35 +25,25 @@ test('browser: legacy data, favorites, quiz history, reload and account-isolated
     await ctx.route('**/vendor/msal-browser.min.js', route => route.fulfill({ contentType: 'text/javascript', body: msal }));
     await ctx.route('https://graph.microsoft.com/**', async route => {
       const request = route.request(), p = new URL(request.url()).pathname, method = request.method();
-      const db = cloud.get(account) || { state: null, version: 0, history: new Map() }; cloud.set(account, db);
+      const db = cloud.get(account) || { state: null, version: 0, history: new Map(), updates: new Map() }; cloud.set(account, db);
       const send = (body, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
       if (p.endsWith('/special/approot')) return send({ id: 'root' });
       if (p.endsWith('/root/children')) return send({ value: [{ id: 'term', name: 'TERMINOLOGY', folder: {} }] });
-      if (p.endsWith('/term/children')) return send({ value: [{ id: 'history', name: 'history', folder: {} }] });
+      if (p.endsWith('/term/children')) return send({ value: [{ id: 'history', name: 'history', folder: {} }, { id: 'updates', name: 'state-updates', folder: {} }] });
       if (p.endsWith('/history/children')) return send({ value: [...db.history.keys()].map(id => ({ id, name: id + '.data', file: {} })) });
       if (p.endsWith('/term:/user-data.data') || p.endsWith('/items/state')) return db.state ? send({ id: 'state', eTag: String(db.version) }) : send({}, 404);
       if (p.endsWith('/state/content')) return send(db.state);
-      if (p.endsWith('/createUploadSession')) {
-        const tag = request.headers()['if-match'];
-        if ((tag && tag !== String(db.version)) || (!tag && db.state)) return send({}, 412);
-        return send({ uploadUrl: `https://upload.example.test/${account}/${db.version}` });
-      }
-      if (p.endsWith('/items/term') && method === 'PUT') {
-        const tag = request.headers()['if-match'];
-        if ((tag && tag !== String(db.version)) || (!tag && db.state)) return send({}, 412);
-        db.state = db.pending; db.version++; return send({ id: 'state' });
-      }
+      if (p.endsWith('/createUploadSession')) return send({ error: { code: 'invalidRequest' } }, 400);
+      if (p.endsWith('/updates/children')) return send({ value: [...db.updates.keys()].map(id => ({ id, name: id + '.data', file: {}, eTag: '1' })) });
+      if (p.endsWith('/term:/user-data.data:/content') && method === 'PUT') { db.state = request.postDataJSON(); db.version++; return send({ id: 'state' }); }
+      const update = p.match(/updates:\/(.+)\.data:\/content$/);
+      if (update && method === 'PUT') { db.updates.set(update[1], request.postDataJSON()); return send({ id: update[1] }); }
       const put = p.match(/history:\/(.+)\.data:\/content$/);
       if (put && method === 'PUT') { db.history.set(put[1], request.postDataJSON()); return send({ id: put[1] }); }
       const get = p.match(/items\/(.+)\/content$/);
+      if (get && db.updates.has(get[1])) return send(db.updates.get(get[1]));
       if (get && db.history.has(get[1])) return send(db.history.get(get[1]));
       errors.push(`Unhandled ${method} ${p}`); return send({}, 500);
-    });
-    await ctx.route('https://upload.example.test/**', async route => {
-      const db = cloud.get(account), version = new URL(route.request().url()).pathname.split('/').pop();
-      if (String(db.version) !== version) return route.fulfill({ status: 412, body: '{}' });
-      db.pending = JSON.parse(route.request().postDataBuffer().toString());
-      return route.fulfill({ status: 202, contentType: 'application/json', body: '{"nextExpectedRanges":[]}' });
     });
     const page = await ctx.newPage(); page.on('pageerror', error => errors.push(error.message));
     await page.goto(url); await page.waitForFunction(() => Learning.ready && DATA.length > 0);

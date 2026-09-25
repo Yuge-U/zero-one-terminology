@@ -3,6 +3,7 @@
   const DEFAULT_CLIENT_ID = 'b75b499d-2b47-42ed-9e10-41cd76dbc6c5';
   const SCOPES = ['Files.ReadWrite.AppFolder'];
   const GRAPH = 'https://graph.microsoft.com/v1.0';
+  const Model = typeof module !== 'undefined' && module.exports ? require('./learning-model.js') : root.LearningModel;
   class GraphError extends Error {
     constructor(status, message) { super(message); this.status = status; }
   }
@@ -15,6 +16,7 @@
       const override = storage.getItem('basketball-tactics-onedrive-client-id');
       this.clientId = /^[0-9a-f-]{36}$/i.test(override || '') ? override : DEFAULT_CLIENT_ID;
       this.account = null;
+      this.updateCache = new Map();
     }
     async init() {
       if (!this.msal?.PublicClientApplication) throw new Error('Microsoft接続機能を読み込めませんでした。ページを再読込してください。');
@@ -74,42 +76,45 @@
       const app = await this.request('/me/drive/special/approot');
       const terminology = await this.folder(app.id, 'TERMINOLOGY');
       const history = await this.folder(terminology.id, 'history');
-      return this.folderIds = { terminology: terminology.id, history: history.id };
+      const updates = await this.folder(terminology.id, 'state-updates');
+      return this.folderIds = { terminology: terminology.id, history: history.id, updates: updates.id };
     }
-    // Read metadata on both sides of content download: never pair stale bytes with a newer ETag.
+    // Immutable update records are authoritative; user-data.data is a rebuildable snapshot.
     async readState() {
       const folders = await this.folders();
       const path = `/me/drive/items/${encodeURIComponent(folders.terminology)}:/user-data.data`;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        let before;
-        try { before = await this.request(path); } catch (error) { if (error.status === 404) return null; throw error; }
-        const data = JSON.parse(await this.request(`/me/drive/items/${encodeURIComponent(before.id)}/content`, {}, 'text'));
-        const after = await this.request(`/me/drive/items/${encodeURIComponent(before.id)}`);
-        if (before.eTag && before.eTag === after.eTag) return { data, id: before.id, eTag: before.eTag };
+      let snapshot = null;
+      try {
+        const item = await this.request(path);
+        snapshot = Model.validate(JSON.parse(await this.request(`/me/drive/items/${encodeURIComponent(item.id)}/content`, {}, 'text')));
+      } catch (error) { if (error.status !== 404) throw error; }
+      const items = (await this.children(folders.updates)).filter(item => item.file && item.name.endsWith('.data'));
+      let data = snapshot || Model.empty();
+      for (const item of items) {
+        let cached = this.updateCache.get(item.id);
+        if (!cached || !item.eTag || cached.eTag !== item.eTag) {
+          const update = Model.validate(JSON.parse(await this.request(`/me/drive/items/${encodeURIComponent(item.id)}/content`, {}, 'text')));
+          cached = { eTag: item.eTag, data: update }; this.updateCache.set(item.id, cached);
+        }
+        data = Model.merge(data, cached.data);
       }
-      throw new GraphError(412, '他の端末で更新中です。少し待って同期してください。');
+      if (!snapshot && !items.length) return null;
+      return { data, snapshotMatches: !!snapshot && JSON.stringify(Model.merge(snapshot)) === JSON.stringify(data) };
     }
-    // Upload sessions document If-Match and fail-on-create, unlike the simple PUT API.
+    // Never depend on last-writer-wins for learning state. Persist the delta to a
+    // unique file FIRST, then update the optional shared snapshot using simple PUT.
     async writeState(data, previous) {
       const folders = await this.folders();
-      const path = previous ? `/me/drive/items/${encodeURIComponent(previous.id)}/createUploadSession` : `/me/drive/items/${encodeURIComponent(folders.terminology)}:/user-data.data:/createUploadSession`;
-      const session = await this.request(path, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', ...(previous ? { 'If-Match': previous.eTag } : {}) },
-        body: JSON.stringify({ deferCommit: true, item: { name: 'user-data.data', '@microsoft.graph.conflictBehavior': previous ? 'replace' : 'fail' } })
+      Model.validate(data);
+      const delta = Model.empty();
+      for (const field of ['favorites', 'viewed']) for (const [id, record] of Object.entries(data[field])) {
+        if (JSON.stringify(record) !== JSON.stringify(previous?.data?.[field]?.[id])) delta[field][id] = record;
+      }
+      const put = (parent, name, value) => this.request(`/me/drive/items/${encodeURIComponent(parent)}:/${name}:/content`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json; charset=utf-8' }, body: JSON.stringify(value)
       });
-      const body = new TextEncoder().encode(JSON.stringify(data));
-      if (body.length > 10 * 1024 * 1024) throw new Error('学習データが大きすぎます。バックアップしてください。');
-      if (new URL(session.uploadUrl).protocol !== 'https:') throw new Error('不正なアップロード先です。');
-      // Preauthenticated URL: do not forward the Graph bearer token.
-      const response = await this.fetcher(session.uploadUrl, { method: 'PUT', headers: { 'Content-Range': `bytes 0-${body.length - 1}/${body.length}` }, body });
-      if (!response.ok) throw new GraphError(response.status, '学習データを保存できませんでした。再試行してください。');
-      if (response.status !== 202) throw new Error('条件付き保存の応答を確認できませんでした。同期を停止しました。');
-      // Compare again at COMMIT, not merely when opening the session: another
-      // device may update the file while these bytes are being transferred.
-      return this.request(`/me/drive/items/${encodeURIComponent(folders.terminology)}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json', ...(previous ? { 'If-Match': previous.eTag } : {}) },
-        body: JSON.stringify({ name: 'user-data.data', '@microsoft.graph.conflictBehavior': previous ? 'replace' : 'fail', '@microsoft.graph.sourceUrl': session.uploadUrl })
-      });
+      if (Object.keys(delta.favorites).length || Object.keys(delta.viewed).length) await put(folders.updates, crypto.randomUUID() + '.data', Model.merge(delta));
+      return put(folders.terminology, 'user-data.data', data);
     }
     async histories() { return this.children((await this.folders()).history); }
     async readHistory(id) { return JSON.parse(await this.request(`/me/drive/items/${encodeURIComponent(id)}/content`, {}, 'text')); }

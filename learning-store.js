@@ -73,7 +73,7 @@
       const previous = await drive.readState();
       const merged = Model.merge(previous?.data || Model.empty(), store.state());
       try {
-        if (!previous || JSON.stringify(merged) !== JSON.stringify(Model.merge(previous.data))) await drive.writeState(merged, previous);
+        if (!previous || previous.snapshotMatches === false || JSON.stringify(merged) !== JSON.stringify(Model.merge(previous.data))) await drive.writeState(merged, previous);
         store.remember(merged);
         return;
       } catch (error) { if (![409, 412].includes(error.status) || attempt === 3) throw error; }

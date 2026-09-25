@@ -84,33 +84,42 @@ test('new-file conflict is merged and repeated conflict remains an error', async
   const d = { histories: async () => [], readState: async () => { reads++; return null; }, writeState: async () => { throw Object.assign(new Error('conflict'), { status: 409 }); } };
   await assert.rejects(syncLearning(a, d)); assert.equal(reads, 4); assert.equal(a.state().viewed['GBT-0001'].value, true);
 });
-test('upload uses If-Match; upload URL gets no access token; files are not .json', async () => {
-  const calls = [];
-  const d = new OneDrive({ storage: new Storage(), location: { href: 'https://example.test/terminology/' }, fetcher: async (url, options) => {
-    calls.push({ url, options });
-    return Response.json(url.includes('createUploadSession') ? { uploadUrl: 'https://upload.example.test/session' } : { id: 'state' }, { status: url.startsWith('https://upload.') ? 202 : 200 });
-  } });
-  d.account = {}; d.client = { acquireTokenSilent: async () => ({ accessToken: 'mock-token' }) }; d.folderIds = { terminology: 'terminology', history: 'history' };
-  await d.writeState(Model.empty(), { id: 'state', eTag: 'etag-1' });
-  assert.equal(calls[0].options.headers['If-Match'], 'etag-1');
-  assert.equal(calls[1].options.headers.Authorization, undefined);
-  assert.match(calls[1].options.headers['Content-Range'], /^bytes 0-/);
-  assert.equal(calls[2].options.headers['If-Match'], 'etag-1', 'final commit must also be conditional');
-  assert.equal(JSON.parse(calls[0].options.body).deferCommit, true);
-  assert.equal(JSON.parse(calls[2].options.body)['@microsoft.graph.sourceUrl'], 'https://upload.example.test/session');
-  await d.writeHistory(quiz('q'));
-  assert.match(calls[3].url, /history:\/q.data:\/content$/);
-  assert.ok(calls.every(c => !c.url.includes('.json')));
-});
-test('content changed during download is retried before associating ETag', async () => {
-  const d = new OneDrive({ storage: new Storage(), location: { href: 'https://example.test/' } });
-  d.folderIds = { terminology: 't', history: 'h' };
-  let reads = 0;
-  d.request = async path => {
-    if (path.endsWith('/content')) return JSON.stringify(Model.empty());
-    reads++; return { id: 'state', eTag: reads === 1 ? 'old' : 'new' };
-  };
-  assert.equal((await d.readState()).eTag, 'new'); assert.equal(reads, 4);
+test('immutable deltas survive concurrent snapshots and failed snapshot writes', async () => {
+  const files = new Map(); let snapshot = null, failSnapshot = false;
+  function drive() {
+    const d = new OneDrive({ storage: new Storage(), location: { href: 'https://example.test/' } });
+    d.folderIds = { terminology: 't', history: 'h', updates: 'u' };
+    d.children = async () => [...files.keys()].map(id => ({ id, name: id + '.data', file: {}, eTag: '1' }));
+    d.request = async (p, options = {}) => {
+      if (options.method === 'PUT') {
+        assert.ok(p.endsWith('.data:/content'));
+        if (p.includes('/u:/')) { files.set(p.split('/u:/')[1].split('.data:')[0], JSON.parse(options.body)); return {}; }
+        if (failSnapshot) throw new Error('offline');
+        snapshot = JSON.parse(options.body); return {};
+      }
+      if (p.endsWith(':/user-data.data')) { if (!snapshot) throw Object.assign(new Error('missing'), { status: 404 }); return { id: 's' }; }
+      if (p.endsWith('/s/content')) return JSON.stringify(snapshot);
+      const id = p.split('/items/')[1].split('/content')[0];
+      return JSON.stringify(files.get(id));
+    };
+    return d;
+  }
+  const a = store(), b = store(), da = drive(), db = drive();
+  a.set('favorites', 'GBT-0001', true); b.set('favorites', 'GBT-0002', true);
+  await da.writeState(a.state(), null); await db.writeState(b.state(), null);
+  assert.equal(snapshot.favorites['GBT-0001'], undefined, 'snapshot may be stale');
+  let remote = await drive().readState();
+  assert.equal(remote.data.favorites['GBT-0001'].value, true);
+  assert.equal(remote.data.favorites['GBT-0002'].value, true);
+  assert.equal(remote.snapshotMatches, false);
+  a.remember(remote.data); a.set('favorites', 'GBT-0001', false);
+  failSnapshot = true; await assert.rejects(da.writeState(a.state(), remote), /offline/);
+  remote = await drive().readState();
+  assert.equal(remote.data.favorites['GBT-0001'].value, false, 'committed delta survives failed snapshot');
+  failSnapshot = false; const before = files.size;
+  await da.writeState(remote.data, remote);
+  assert.equal(files.size, before, 'retry does not duplicate committed operations');
+  assert.equal((await drive().readState()).snapshotMatches, true);
 });
 test('CANVAS scanner ignores all proposed learning files', () => {
   const fs = require('node:fs');
