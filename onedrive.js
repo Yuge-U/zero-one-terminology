@@ -45,7 +45,12 @@
           await new Promise(resolve => setTimeout(resolve, delay * 1000));
           continue;
         }
-        if (!response.ok) throw new GraphError(response.status, `OneDriveとの同期に失敗しました (${response.status})。再接続または再試行してください。`);
+        if (!response.ok) {
+          const detail = await response.json().catch(() => ({}));
+          const operation = options.method === 'PUT' ? '保存確定' : path.includes('createUploadSession') ? '保存準備' : options.method === 'POST' ? 'フォルダ作成' : path.includes('/content') ? 'データ読込' : '保存先確認';
+          console.error('OneDrive request failed', { operation, status: response.status, code: detail.error?.code, message: detail.error?.message });
+          throw new GraphError(response.status, `OneDriveの${operation}に失敗しました (${response.status}${detail.error?.code ? ' / ' + detail.error.code : ''})。端末のデータは保持されています。`);
+        }
         if (response.status === 204) return null;
         return type === 'text' ? response.text() : response.json();
       }
