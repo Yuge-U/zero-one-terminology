@@ -7,7 +7,7 @@ The dictionary now selects a visual representation by exact term name. `diagrams
 - Solid lines describe player travel, blue dotted lines dribbling, orange dashed lines passes. Attackers are circles, defenders rounded squares; ball possession is marked in orange. Footwork and side-view shooting have their own legends.
 - Playback advances through explanation frames and stops at the end. It does not imply biomechanically accurate animation. Moving to another term, returning to the list, opening a quiz or selecting a category stops playback.
 - Category selection clears the selected term, query and optional filters, restores the list, and ends an active quiz through the existing learning persistence mechanism.
-- Previous/next use the same filtering and ordering as the displayed list, and disable at its ends.
+- Previous/next use the same filtering and ordering as the displayed list, and return to the list at its ends while preserving the query and filters.
 
 Reference material consulted for the basic screen/cut distinctions:
 - FIBA/WABC coaching resources: https://about.fiba.basketball/en/wabc-documents

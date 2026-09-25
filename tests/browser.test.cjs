@@ -75,6 +75,16 @@ test('browser: legacy data, favorites, quiz history, reload and account-isolated
     assert.equal(await page.evaluate(()=>selected),'GBT-0002');
     await page.getByRole('button',{name:/前の用語/}).click();
     assert.equal(await page.evaluate(()=>selected),'GBT-0001');
+    await page.locator('.term-prev').click();
+    assert.equal(await page.evaluate(()=>selected),null);
+    assert.equal(await page.locator('#app').evaluate(el=>el.classList.contains('show')),false);
+    await page.locator('#q').fill('Backcourt');
+    await page.locator('.term').last().click();
+    await page.locator('.term-next').click();
+    assert.equal(await page.evaluate(()=>selected),null);
+    assert.equal(await page.locator('#q').inputValue(),'Backcourt');
+    assert.equal(await page.locator('.term-navigation').count(),0);
+
     await page.locator('[data-cat="DEFENSE"]').click();
     assert.equal(await page.evaluate(()=>selected),null);
     assert.equal(await page.locator('#app').evaluate(el=>el.classList.contains('show')),false);
