@@ -52,6 +52,23 @@ test('browser: legacy data, favorites, quiz history, reload and account-isolated
   try {
     const guest = await context(null, true), page = guest.page;
     assert.equal(await page.evaluate(() => Learning.favorites().has('GBT-0001')), true);
+    assert.equal(await page.getByRole('button', {name:'すべて',exact:true}).count(),0);
+    const total = await page.locator('.term').count();
+    await page.locator('[data-filter="favorites"]').click();
+    assert.equal(await page.locator('.term').count(),1);
+    await page.locator('[data-filter="sentences"]').click();
+    assert.equal(await page.evaluate(() => DATA.filter(match).every(t => favs().has(t.ID) && coachEnglish(t)[0])),true);
+    await page.locator('[data-filter="favorites"]').click();
+    assert.equal(await page.evaluate(() => DATA.filter(match).every(t => coachEnglish(t)[0])),true);
+    await page.locator('[data-filter="sentences"]').click();
+    assert.equal(await page.locator('.term').count(),total);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),true);
+    fs.mkdirSync(path.join(root,'..','outputs'),{recursive:true});
+    await page.screenshot({path:path.join(root,'..','outputs','terminology-ui-mobile.png')});
+    await page.setViewportSize({width:1440,height:1000});
+    await page.screenshot({path:path.join(root,'..','outputs','terminology-ui-desktop.png'),fullPage:true});
+    await page.setViewportSize({width:390,height:844});
+
     await page.locator('.term').first().click(); await page.locator('.fav').click();
     assert.equal(await page.evaluate(() => Learning.favorites().has('GBT-0001')), false);
     await page.reload(); await page.waitForFunction(() => Learning.ready && DATA.length > 0);
