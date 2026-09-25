@@ -81,7 +81,16 @@ test('browser: legacy data, favorites, quiz history, reload and account-isolated
     assert.equal(await page.evaluate(() => Learning.favorites().has('GBT-0001')), false);
     await page.getByRole('button', { name: 'QUIZ', exact: true }).click();
     await page.getByRole('button', { name: 'START QUIZ', exact: true }).click();
-    for (let i = 0; i < 5; i++) { await page.locator('.choice').first().click(); await page.locator('.qnext').click(); }
+    for (let i = 0; i < 5; i++) {
+      const index=await page.evaluate(correct=>Q.options.findIndex(t=>(t.ID===Q.items[Q.i].ID)===correct),i%2===0);
+      await page.locator('.choice').nth(index).click();
+      assert.equal(await page.locator('.answer-review-item').count(),5);
+      assert.equal(await page.locator('.answer-review-item.is-correct').count(),1);
+      const definitions=await page.evaluate(()=>Q.options.map(t=>t['定義']));
+      assert.deepEqual(await page.locator('.answer-review-item p').allTextContents(),definitions);
+      if(i===0) await page.screenshot({path:path.join(root,'..','outputs','quiz-answer-review.png'),fullPage:true});
+      await page.locator('.qnext').click();
+    }
     await page.getByRole('button', { name: '辞書へ戻る', exact: true }).click();
     await page.getByRole('button', { name: 'MY LEARNING · 同期' }).click();
     assert.match(await page.locator('#learningStats').textContent(), /クイズ 1回/);
