@@ -1,0 +1,10 @@
+.learning-launch{border:1px solid #1688ff;background:#eaf4ff;color:#075caa;padding:7px 12px;border-radius:999px;font-weight:700;cursor:pointer}
+.learning-dialog{width:min(700px,calc(100% - 24px));max-height:88vh;border:1px solid #dce4ed;border-radius:18px;padding:24px;color:#152033}
+.learning-dialog::backdrop{background:#09111caa}
+.learning-dialog h2{margin:8px 0 16px}.learning-dialog h3{margin-top:24px;font-size:15px}.learning-dialog p{line-height:1.6}
+.learning-close{float:right;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
+.learning-actions{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.learning-actions button{border:1px solid #b5cce4;border-radius:9px;background:#edf6ff;color:#105892;padding:10px;cursor:pointer}
+.learning-actions button:disabled{opacity:.5;cursor:default}.learning-error{color:#a12c23}
+.learning-term{display:block;width:100%;padding:12px;border:0;border-bottom:1px solid #dce4ed;text-align:left;background:#f6f8fb;cursor:pointer}
+#learningMistakes,#learningHistory{max-height:230px;overflow:auto}#learningStats{background:#eaf4ff;border-radius:10px;padding:14px}
+button:focus-visible{outline:3px solid #1688ff;outline-offset:2px}
