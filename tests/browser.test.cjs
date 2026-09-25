@@ -47,6 +47,7 @@ test('browser: legacy data, favorites, quiz history, reload and account-isolated
     });
     const page = await ctx.newPage(); page.on('pageerror', error => errors.push(error.message));
     await page.goto(url); await page.waitForFunction(() => Learning.ready && DATA.length > 0);
+    await page.getByRole('button',{name:'確認しました',exact:true}).click();
     return { ctx, page };
   }
   try {
@@ -99,6 +100,12 @@ test('browser: legacy data, favorites, quiz history, reload and account-isolated
     const real = await browser.newContext(); const realPage = await real.newPage();
     realPage.on('pageerror', error => errors.push(error.message));
     await realPage.goto(url); await realPage.waitForFunction(() => Learning.ready && DATA.length > 0);
+    assert.equal(await realPage.locator('#welcomeDialog').isVisible(),true);
+    await realPage.setViewportSize({width:390,height:844});
+    await realPage.screenshot({path:path.join(root,'..','outputs','terminology-welcome-mobile.png')});
+    await realPage.getByRole('button',{name:'確認しました',exact:true}).click();
+    await realPage.reload(); await realPage.waitForFunction(() => Learning.ready && DATA.length > 0);
+    assert.equal(await realPage.locator('#welcomeDialog').isVisible(),false);
     await realPage.getByRole('button', { name: 'MY LEARNING · 同期' }).click();
     assert.equal(await realPage.locator('#learningConnect').isEnabled(), true);
     assert.match(await realPage.locator('#learningStatus').textContent(), /このブラウザに保存中/);
