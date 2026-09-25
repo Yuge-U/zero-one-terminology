@@ -11,7 +11,7 @@ test('browser: legacy data, favorites, quiz history, reload and account-isolated
     const file = path.join(root, decodeURIComponent(new URL(req.url, 'http://localhost').pathname));
     const target = file === root + path.sep ? path.join(root, 'index.html') : file;
     try {
-      res.setHeader('Content-Type', target.endsWith('.svg') ? 'image/svg+xml' : target.endsWith('.js') ? 'text/javascript' : target.endsWith('.css') ? 'text/css' : target.endsWith('.json') ? 'application/json' : 'text/html');
+      res.setHeader('Content-Type', target.endsWith('.wav') ? 'audio/wav' : target.endsWith('.svg') ? 'image/svg+xml' : target.endsWith('.js') ? 'text/javascript' : target.endsWith('.css') ? 'text/css' : target.endsWith('.json') ? 'application/json' : 'text/html');
       res.end(fs.readFileSync(target));
     } catch { res.statusCode = 404; res.end(); }
   });
@@ -70,7 +70,12 @@ test('browser: legacy data, favorites, quiz history, reload and account-isolated
     await page.screenshot({path:path.join(root,'..','outputs','terminology-ui-desktop.png'),fullPage:true});
     await page.setViewportSize({width:390,height:844});
 
-    await page.locator('.term').first().click(); await page.locator('.fav').click();
+    await page.locator('.term').first().click();
+    await page.evaluate(()=>{const NativeAudio=window.Audio;window.Audio=function(src){const player=new NativeAudio(src);window.testPronunciation=player;return player}});
+    await page.getByRole('button',{name:'▶ 英語の発音を聞く',exact:true}).click();
+    await page.waitForFunction(()=>window.testPronunciation && window.testPronunciation.currentTime>0);
+    assert.equal(await page.evaluate(()=>window.testPronunciation.error),null);
+    await page.locator('.fav').click();
     assert.equal(await page.evaluate(() => Learning.favorites().has('GBT-0001')), false);
     await page.reload(); await page.waitForFunction(() => Learning.ready && DATA.length > 0);
     assert.equal(await page.evaluate(() => Learning.favorites().has('GBT-0001')), false);

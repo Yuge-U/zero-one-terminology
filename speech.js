@@ -1,34 +1,25 @@
-// Keep the utterance alive and start directly within the user's tap handler.
+// Play pre-generated English audio directly from a tap, using the media channel.
 (() => {
-  const synth = window.speechSynthesis;
-  let voices = [], current = null, timer;
+  let current = null, timer;
   function status(message) {
     const node = document.getElementById('speechStatus');
     if (node) { node.textContent = message; node.hidden = !message; }
   }
-  function refreshVoices() { voices = synth.getVoices(); }
-  if (synth) { refreshVoices(); synth.addEventListener('voiceschanged', refreshVoices); }
   window.speak = function (text) {
-    if (!synth || !window.SpeechSynthesisUtterance) { status('このブラウザでは音声を再生できません。Safariなどのブラウザで開いてください。'); return; }
-    // Request media playback routing on browsers that expose Audio Session API.
-    // Unsupported browsers retain their existing speech behavior.
-    try { if (window.navigator?.audioSession) window.navigator.audioSession.type = 'playback'; } catch {}
     clearTimeout(timer);
-    current = null;
-    if (synth.speaking || synth.pending) synth.cancel();
-    refreshVoices();
-    const u = new SpeechSynthesisUtterance(String(text));
-    const english = voices.filter(v => /^en[-_]/i.test(v.lang));
-    const voice = english.find(v => v.localService && /^en[-_]US$/i.test(v.lang)) || english.find(v => v.localService) || english[0];
-    if (voice) u.voice = voice;
-    u.lang = voice ? voice.lang : 'en-US'; u.rate = 0.82; u.volume = 1;
-    current = u;
-    u.onstart = () => { if (current === u) { clearTimeout(timer); status('再生中です。聞こえない場合はメディア音量・音声の出力先をご確認ください。'); } };
-    u.onend = () => { if (current === u) { clearTimeout(timer); current = null; status(''); } };
-    u.onerror = () => { if (current === u) { clearTimeout(timer); current = null; status('音声を再生できませんでした。Safariで開き直し、発音ボタンをもう一度押してください。'); } };
-    status('音声を準備しています…');
-    timer = setTimeout(() => { if (current === u) status('再生が始まりません。Safariで開き直して再度お試しください。iPhoneの英語音声の設定もご確認ください。'); }, 6000);
-    try { synth.speak(u); if (synth.paused) synth.resume(); }
-    catch { u.onerror(); }
+    if (current) { current.pause(); current.removeAttribute('src'); current.load(); current = null; }
+    const source = Object.prototype.hasOwnProperty.call(window.TERM_AUDIO || {}, String(text)) ? window.TERM_AUDIO[String(text)] : null;
+    if (!source) { status('この発音の音声はまだ用意されていません。ページを再読み込みしてお試しください。'); return; }
+    // HTMLAudioElement chooses the media playback session; no speech synthesis or Web Audio.
+    const player = new Audio(source);
+    current = player;
+    player.volume = 1;
+    player.onplaying = () => { if (current === player) { clearTimeout(timer); status(''); } };
+    player.onended = () => { if (current === player) { clearTimeout(timer); status(''); current = null; } };
+    const failed = () => { if (current === player) { clearTimeout(timer); status('音声を再生できませんでした。通信状態を確認し、発音ボタンをもう一度押してください。'); } };
+    player.onerror = failed;
+    status('音声を読み込んでいます…');
+    timer = setTimeout(() => { if (current === player) status('音声の読み込みに時間がかかっています。通信状態を確認して、もう一度お試しください。'); }, 10000);
+    try { const result = player.play(); if (result) result.catch(failed); } catch { failed(); }
   };
 })();
