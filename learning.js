@@ -70,8 +70,7 @@ window.Learning = (() => {
     document.getElementById('learningConnect').textContent = drive?.account ? '再接続・アカウント変更' : 'Microsoftアカウントで接続';
     document.getElementById('learningDisconnect').hidden = !drive?.account;
     document.getElementById('learningSync').disabled = !drive?.account || syncing;
-    document.getElementById('learningImportGuest').hidden = !drive?.account;
-    for (const id of ['learningImportGuest', 'learningBackup', 'learningRestore', 'learningDisconnect']) document.getElementById(id).disabled = !ready || syncing;
+    for (const id of ['learningBackup', 'learningRestore', 'learningDisconnect']) document.getElementById(id).disabled = !ready || syncing;
     try {
       if (!store) return;
       const quizzes = store.quizzes(), summary = LearningModel.summarize(quizzes), state = store.state();
