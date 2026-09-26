@@ -20,7 +20,7 @@ window.Learning = (() => {
     return syncPromise;
   }
   function favorites() { try { return new Set(Object.entries(store?.state().favorites || {}).filter(([, r]) => r.value).map(([id]) => id)); } catch (e) { error = e.message; return new Set(); } }
-  function viewed(id) { if (ready) change(() => store.set('viewed', id, true)); }
+  function viewed(id) { if (ready) change(() => store.touch('viewed', id)); }
   function toggleFavorite(id) { if (ready) change(() => store.set('favorites', id, !favorites().has(id))); }
   function quizRecord(quiz) {
     if (!quiz || quiz.saved || !quiz.answers.length) return true;
@@ -72,6 +72,15 @@ window.Learning = (() => {
       document.getElementById('learningMistakes').replaceChildren(...mistakes.map(([id, value]) => {
         const term = DATA.find(t => t.ID === id), button = document.createElement('button');
         button.className = 'learning-term'; button.textContent = `${term?.['正式/標準用語'] || id} — 誤答 ${value.mistakes}回 / 正解 ${value.correct}回`;
+        button.onclick = () => { document.getElementById('learningDialog').close(); closeQuiz(); show(id); };
+        return button;
+      }));
+      const viewed = Object.entries(state.viewed).filter(([, record]) => record.value).sort((a, b) => b[1].clock - a[1].clock).slice(0, 50);
+      document.getElementById('learningViewed').replaceChildren(...viewed.map(([id, record]) => {
+        const term = DATA.find(t => t.ID === id), button = document.createElement('button');
+        button.className = 'learning-term';
+        const when = new Date(record.clock).toLocaleString('ja-JP');
+        button.textContent = `${term?.['正式/標準用語'] || id} — ${term?.['日本語推奨表記'] || ''} · ${when}`;
         button.onclick = () => { document.getElementById('learningDialog').close(); closeQuiz(); show(id); };
         return button;
       }));
