@@ -21,6 +21,13 @@ window.Learning = (() => {
   }
   function favorites() { try { return new Set(Object.entries(store?.state().favorites || {}).filter(([, r]) => r.value).map(([id]) => id)); } catch (e) { error = e.message; return new Set(); } }
   function viewed(id) { if (ready) change(() => store.touch('viewed', id)); }
+  function openViewed() {
+    open();
+    requestAnimationFrame(() => {
+      const target = document.getElementById('learningViewed');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
   function toggleFavorite(id) { if (ready) change(() => store.set('favorites', id, !favorites().has(id))); }
   function quizRecord(quiz) {
     if (!quiz || quiz.saved || !quiz.answers.length) return true;
@@ -92,7 +99,12 @@ window.Learning = (() => {
     } catch (e) { status.textContent = e.message; }
   }
   async function connect() {
-    try { if (typeof Q !== 'undefined' && !quizRecord(Q)) return; closeQuiz(); await drive.signIn(); } catch (e) { fail(e); }
+    try {
+      if (typeof Q !== 'undefined' && !quizRecord(Q)) return;
+      closeQuiz();
+      localStorage.setItem('zot_import_guest_after_login', '1');
+      await drive.signIn();
+    } catch (e) { fail(e); }
   }
   async function disconnect() {
     try { if (typeof Q !== 'undefined' && !quizRecord(Q)) return; closeQuiz(); await sync(); if (error) return; await drive.signOut(); } catch (e) { fail(e); }
@@ -125,6 +137,11 @@ window.Learning = (() => {
       if (account) {
         if (!account.homeAccountId) { drive.account = null; throw new Error('アカウントを識別できません。再接続してください。'); }
         store.scope = drive.clientId + ':' + account.homeAccountId;
+        if (localStorage.getItem('zot_import_guest_after_login') === '1') {
+          store.importData(store.state('guest'), store.quizzes('guest'));
+          localStorage.removeItem('zot_import_guest_after_login');
+          dirty = true;
+        }
       }
       recoverQuiz();
     } catch (e) { error = e.message; }
@@ -138,5 +155,5 @@ window.Learning = (() => {
     notify();
     if (event.key.includes(':op:') || event.key.includes(':quiz:')) schedule();
   });
-  return { init, open, favorites, viewed, toggleFavorite, beginQuiz, answerQuiz, finishQuiz: quizRecord, sync, connect, disconnect, importGuest, backup, restore, get ready() { return ready; } };
+  return { init, open, openViewed, favorites, viewed, toggleFavorite, beginQuiz, answerQuiz, finishQuiz: quizRecord, sync, connect, disconnect, importGuest, backup, restore, get ready() { return ready; } };
 })();
