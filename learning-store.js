@@ -31,6 +31,14 @@
       // Separate operation keys prevent concurrent browser tabs from overwriting unrelated edits.
       this.write(this.prefix() + 'op:' + opId, op);
     }
+    touch(field, id) {
+      if (!['viewed'].includes(field) || !Model.validId(id)) throw new Error('閲覧項目が不正です。');
+      const state = this.state();
+      const clock = Math.max(this.now(), ...['favorites', 'viewed'].flatMap(f => Object.values(state[f]).map(r => r.clock + 1)));
+      const opId = this.uuid(), op = Model.empty();
+      op[field][id] = { value: true, clock, opId };
+      this.write(this.prefix() + 'op:' + opId, op);
+    }
     migrateLegacy() {
       const prefix = this.prefix('guest');
       if (this.storage.getItem(prefix + 'legacy-migrated')) return;
