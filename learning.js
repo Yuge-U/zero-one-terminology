@@ -22,6 +22,7 @@ window.Learning = (() => {
   function favorites() { try { return new Set(Object.entries(store?.state().favorites || {}).filter(([, r]) => r.value).map(([id]) => id)); } catch (e) { error = e.message; return new Set(); } }
   function viewed(id) { if (ready) change(() => store.touch('viewed', id)); }
   function viewedIds() { try { return new Set(Object.entries(store?.state().viewed || {}).filter(([, r]) => r.value).map(([id]) => id)); } catch (e) { error = e.message; return new Set(); } }
+  function viewedRecords() { try { return store?.state().viewed || {}; } catch (e) { error = e.message; return {}; } }
   function openViewed() {
     open();
     requestAnimationFrame(() => {
@@ -156,5 +157,5 @@ window.Learning = (() => {
     notify();
     if (event.key.includes(':op:') || event.key.includes(':quiz:')) schedule();
   });
-  return { init, open, openViewed, favorites, viewed, viewedIds, toggleFavorite, beginQuiz, answerQuiz, finishQuiz: quizRecord, sync, connect, disconnect, importGuest, backup, restore, get ready() { return ready; } };
+  return { init, open, openViewed, favorites, viewed, viewedIds, viewedRecords, toggleFavorite, beginQuiz, answerQuiz, finishQuiz: quizRecord, sync, connect, disconnect, importGuest, backup, restore, get ready() { return ready; } };
 })();
