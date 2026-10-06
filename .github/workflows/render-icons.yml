@@ -56,14 +56,15 @@ jobs:
               page.on('pageerror', e => errors.push(e.message));
               await page.goto(base, { waitUntil: 'networkidle' });
               await page.waitForFunction(() => document.querySelectorAll('.term').length > 0);
+              await page.getByRole('button', { name: '確認しました', exact: true }).click();
               const images = await page.locator('.brand img, .empty img').evaluateAll(imgs => imgs.map(img => ({ src: img.src, loaded: img.complete && img.naturalWidth > 0 })));
               assert.equal(images.length, 2);
               assert.ok(images.every(img => img.loaded && img.src.includes('20261007b')), JSON.stringify(images));
               assert.equal(await page.locator('link[rel="icon"]').getAttribute('type'), 'image/png');
               assert.deepEqual(errors, []);
-              await page.screenshot({ path: 'production-mobile.png', fullPage: true });
+              await page.screenshot({ path: 'production-mobile.png', fullPage: false });
               await page.setViewportSize({ width: 1440, height: 1000 });
-              await page.screenshot({ path: 'production-desktop.png', fullPage: true });
+              await page.screenshot({ path: 'production-desktop.png', fullPage: false });
               console.log('Production browser check passed:', JSON.stringify(images));
             } finally { await browser.close(); }
           })().catch(e => { console.error(e); process.exitCode = 1; });
