@@ -4,16 +4,19 @@ const sharp = require('sharp');
 
 async function renderIcons() {
   const root = path.resolve(__dirname, '..');
-  const source = await fs.readFile(path.join(root, 'icon.svg'));
-  if (/<image\b/i.test(source.toString())) {
-    throw new Error('icon.svg must contain vector artwork, not an embedded raster image');
+  const source = await fs.readFile(path.join(root, 'branding/terminology-master.png'));
+  const metadata = await sharp(source).metadata();
+  if (metadata.width !== metadata.height || metadata.width < 1024) {
+    throw new Error('Artwork must be square and at least 1024px; upscaling is not allowed');
   }
   for (const size of [180, 192, 512]) {
-    // Rasterize the vector at 4x the target size, then downsample for smooth edges.
-    await sharp(source, { density: 72 * size * 4 / 1024 })
-      .resize(size, size, { fit: 'fill', kernel: 'lanczos3' })
+    await sharp(source)
+      .resize(size, size, { kernel: 'lanczos3', withoutEnlargement: true })
       .png()
       .toFile(path.join(root, `icon-${size}-v2.png`));
   }
+  // Compatibility SVG wraps the original high-resolution artwork, not a vector recreation.
+  await fs.writeFile(path.join(root, 'icon.svg'),
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${metadata.width} ${metadata.height}" role="img" aria-label="ZERO ONE TERMINOLOGY"><image width="${metadata.width}" height="${metadata.height}" href="data:image/png;base64,${source.toString('base64')}"/></svg>\n`);
 }
 renderIcons().catch(error => { console.error(error); process.exitCode = 1; });

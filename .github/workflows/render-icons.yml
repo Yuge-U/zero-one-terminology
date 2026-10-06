@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - icon.svg
+      - branding/terminology-master.png
       - scripts/render-icons.cjs
       - package.json
       - package-lock.json
@@ -21,8 +21,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - name: Verify committed icons match vector source
-        run: git diff --exit-code -- icon-180-v2.png icon-192-v2.png icon-512-v2.png
+      - name: Verify committed icons match high-resolution source
+        run: git diff --exit-code -- icon.svg icon-180-v2.png icon-192-v2.png icon-512-v2.png
   verify-production:
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     needs: render
@@ -55,12 +55,13 @@ jobs:
               const errors = [];
               page.on('pageerror', e => errors.push(e.message));
               await page.goto(base, { waitUntil: 'networkidle' });
+              assert.equal(await page.locator('.zeroone-splash img').getAttribute('src'), 'icon-512-v2.png?v=20261007c');
               await page.waitForFunction(() => document.querySelectorAll('.term').length > 0);
               await page.getByRole('button', { name: '確認しました', exact: true }).click();
               await page.locator('.zeroone-splash').waitFor({ state: 'hidden' });
               const images = await page.locator('.brand img, .empty img').evaluateAll(imgs => imgs.map(img => ({ src: img.src, loaded: img.complete && img.naturalWidth > 0 })));
               assert.equal(images.length, 2);
-              assert.ok(images.every(img => img.loaded && img.src.includes('20261007b')), JSON.stringify(images));
+              assert.ok(images.every(img => img.loaded && img.src.includes('20261007c')), JSON.stringify(images));
               assert.equal(await page.locator('link[rel="icon"]').getAttribute('type'), 'image/png');
               assert.deepEqual(errors, []);
               await page.screenshot({ path: 'production-mobile.png', fullPage: false });
