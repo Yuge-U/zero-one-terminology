@@ -1,0 +1,27 @@
+name: Render ZERO ONE icons
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - icon.svg
+      - scripts/render-icons.cjs
+permissions:
+  contents: write
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/render-icons.cjs
+      - name: Commit rendered icons
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add icon-180-v2.png icon-192-v2.png icon-512-v2.png
+          git diff --cached --quiet || git commit -m "Render ZERO ONE app icons"
+          git push
