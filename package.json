@@ -3,9 +3,11 @@
   "private": true,
   "scripts": {
     "test": "node --test tests/learning.test.cjs",
-    "test:browser": "node --test tests/browser.test.cjs"
+    "test:browser": "node --test tests/browser.test.cjs",
+    "build": "node scripts/render-icons.cjs"
   },
   "devDependencies": {
-    "playwright": "1.62.1"
+    "playwright": "1.62.1",
+    "sharp": "0.33.5"
   }
 }

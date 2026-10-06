@@ -1,2 +1,19 @@
-const sharp=require('sharp');const fs=require('fs');const crypto=require('crypto'); // 承認済み画像だけを変換します。
-(async()=>{const source='branding/approved-terminology.webp';const bytes=fs.readFileSync(source);const actual=crypto.createHash('sha256').update(bytes).digest('hex');console.log('TERMINOLOGY source',bytes.length,actual);if(actual!=='bbbfee81c5122f9cad87dcbd52a9b62278ab5c57219544240ecbda8390879a43')throw new Error('Approved TERMINOLOGY artwork mismatch');for(const size of [180,192,512])await sharp(source).resize(size,size,{fit:'cover'}).png().toFile(`icon-${size}-v2.png`);})(); // iPhone/PWA用だけを生成します。
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const sharp = require('sharp');
+
+async function renderIcons() {
+  const root = path.resolve(__dirname, '..');
+  const source = await fs.readFile(path.join(root, 'icon.svg'));
+  if (/<image\b/i.test(source.toString())) {
+    throw new Error('icon.svg must contain vector artwork, not an embedded raster image');
+  }
+  for (const size of [180, 192, 512]) {
+    // Rasterize the vector at 4x the target size, then downsample for smooth edges.
+    await sharp(source, { density: 72 * size * 4 / 1024 })
+      .resize(size, size, { fit: 'fill', kernel: 'lanczos3' })
+      .png()
+      .toFile(path.join(root, `icon-${size}-v2.png`));
+  }
+}
+renderIcons().catch(error => { console.error(error); process.exitCode = 1; });

@@ -3,10 +3,13 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - branding/approved-terminology.webp
+      - icon.svg
       - scripts/render-icons.cjs
+      - package.json
+      - package-lock.json
+      - .github/workflows/render-icons.yml
 permissions:
-  contents: write
+  contents: read
 jobs:
   render:
     runs-on: ubuntu-latest
@@ -15,12 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install sharp@0.33.5
-      - run: node scripts/render-icons.cjs
-      - name: Commit rendered icons
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add icon-180-v2.png icon-192-v2.png icon-512-v2.png
-          git diff --cached --quiet || git commit -m "Render ZERO ONE app icons"
-          git push
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Verify committed icons match vector source
+        run: git diff --exit-code -- icon-180-v2.png icon-192-v2.png icon-512-v2.png
