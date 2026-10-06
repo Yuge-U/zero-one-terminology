@@ -23,3 +23,52 @@ jobs:
       - run: npm run build
       - name: Verify committed icons match vector source
         run: git diff --exit-code -- icon-180-v2.png icon-192-v2.png icon-512-v2.png
+  verify-production:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: render
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify deployed artwork and browser rendering
+        run: |
+          node <<'JS'
+          const fs = require('node:fs');
+          const assert = require('node:assert/strict');
+          const { chromium } = require('playwright');
+          (async () => {
+            const base = 'https://yuge-u.github.io/zero-one-terminology/';
+            for (const file of ['index.html', 'manifest.webmanifest', 'icon.svg', 'icon-180-v2.png', 'icon-192-v2.png', 'icon-512-v2.png']) {
+              const response = await fetch(base + file + '?verify=' + process.env.GITHUB_SHA, { cache: 'no-store' });
+              assert.equal(response.status, 200, file);
+              assert.deepEqual(Buffer.from(await response.arrayBuffer()), fs.readFileSync(file), file + ' differs from deployed commit');
+              console.log('Deployed file matches:', file);
+            }
+            const browser = await chromium.launch();
+            try {
+              const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+              const errors = [];
+              page.on('pageerror', e => errors.push(e.message));
+              await page.goto(base, { waitUntil: 'networkidle' });
+              await page.waitForFunction(() => document.querySelectorAll('.term').length > 0);
+              const images = await page.locator('.brand img, .empty img').evaluateAll(imgs => imgs.map(img => ({ src: img.src, loaded: img.complete && img.naturalWidth > 0 })));
+              assert.equal(images.length, 2);
+              assert.ok(images.every(img => img.loaded && img.src.includes('20261007b')), JSON.stringify(images));
+              assert.equal(await page.locator('link[rel="icon"]').getAttribute('type'), 'image/png');
+              assert.deepEqual(errors, []);
+              await page.screenshot({ path: 'production-mobile.png', fullPage: true });
+              await page.setViewportSize({ width: 1440, height: 1000 });
+              await page.screenshot({ path: 'production-desktop.png', fullPage: true });
+              console.log('Production browser check passed:', JSON.stringify(images));
+            } finally { await browser.close(); }
+          })().catch(e => { console.error(e); process.exitCode = 1; });
+          JS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-screenshots
+          path: production-*.png
