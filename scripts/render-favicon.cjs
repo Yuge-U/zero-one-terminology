@@ -26,4 +26,5 @@ module.exports = async function renderFavicon(source, root, name) {
   await fs.writeFile(path.join(root,`favicon-${name}-20261007f.ico`),ico);
   await fs.writeFile(path.join(root,'favicon.ico'),ico);
   await sharp(source).resize(32,32,{withoutEnlargement:true,kernel:'lanczos3'}).png().toFile(path.join(root,`favicon-${name}-32-20261007f.png`));
+  for (const size of [180,192]) await sharp(source).resize(size,size,{withoutEnlargement:true,kernel:"lanczos3"}).png().toFile(path.join(root,`safari-${name}-${size}-20261007g.png`));
 };

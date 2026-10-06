@@ -23,7 +23,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Verify committed icons match high-resolution source
-        run: git diff --exit-code -- favicon.ico favicon-terminology-20261007f.ico favicon-terminology-32-20261007f.png icon.svg icon-180-v2.png icon-192-v2.png icon-512-v2.png
+        run: git diff --exit-code -- safari-terminology-180-20261007g.png safari-terminology-192-20261007g.png favicon.ico favicon-terminology-20261007f.ico favicon-terminology-32-20261007f.png icon.svg icon-180-v2.png icon-192-v2.png icon-512-v2.png
   verify-production:
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     needs: render
@@ -44,7 +44,7 @@ jobs:
           const { chromium, webkit } = require('playwright');
           (async () => {
             const base = 'https://yuge-u.github.io/zero-one-terminology/';
-            for (const file of ['favicon.ico', 'favicon-terminology-20261007f.ico', 'favicon-terminology-32-20261007f.png', 'index.html', 'manifest.webmanifest', 'icon.svg', 'icon-180-v2.png', 'icon-192-v2.png', 'icon-512-v2.png']) {
+            for (const file of ['safari-terminology-180-20261007g.png', 'safari-terminology-192-20261007g.png', 'favicon.ico', 'favicon-terminology-20261007f.ico', 'favicon-terminology-32-20261007f.png', 'index.html', 'manifest.webmanifest', 'icon.svg', 'icon-180-v2.png', 'icon-192-v2.png', 'icon-512-v2.png']) {
               const response = await fetch(base + file + '?verify=' + process.env.GITHUB_SHA, { cache: 'no-store' });
               assert.equal(response.status, 200, file);
               assert.deepEqual(Buffer.from(await response.arrayBuffer()), fs.readFileSync(file), file + ' differs from deployed commit');
@@ -64,9 +64,10 @@ jobs:
               const images = await page.locator('.brand img, .empty img').evaluateAll(imgs => imgs.map(img => ({ src: img.src, loaded: img.complete && img.naturalWidth > 0 })));
               assert.equal(images.length, 2);
               assert.ok(images.every(img => img.loaded && img.src.includes('20261007c')), JSON.stringify(images));
-              assert.equal(await page.locator('link[rel="icon"]').getAttribute('type'), 'image/x-icon');
-              assert.equal(await page.locator('link[rel="icon"]').getAttribute('href'),'favicon-terminology-20261007f.ico');
+              assert.equal(await page.locator('link[rel="icon"]').getAttribute('type'), 'image/png');
+              assert.equal(await page.locator('link[rel="icon"]').getAttribute('href'),'safari-terminology-192-20261007g.png');
               assert.deepEqual(await page.evaluate(async()=>{const img=new Image();img.src='favicon-terminology-32-20261007f.png';await img.decode();return [img.naturalWidth,img.naturalHeight];}),[32,32]);
+              assert.deepEqual(await page.evaluate(async()=>{const result=[];for(const rel of ['icon','apple-touch-icon']){const img=new Image();img.src=document.querySelector(`link[rel="${rel}"]`).href;await img.decode();result.push([img.naturalWidth,img.naturalHeight]);}return result;}),[[192,192],[180,180]]);
               assert.deepEqual(errors, []);
               await page.screenshot({ path: 'production-mobile-'+engine.name()+'.png', fullPage: false });
               await page.setViewportSize({ width: 1440, height: 1000 });
