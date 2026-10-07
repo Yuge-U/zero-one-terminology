@@ -40,8 +40,8 @@ jobs:
       - run: npx playwright install --with-deps chromium webkit
       - run: node scripts/verify-entry.cjs
   verify-production:
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
-    needs: render
+    if: github.ref == 'refs/heads/main'
+    needs: [render, verify-entry]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -59,6 +59,15 @@ jobs:
           const { chromium, webkit } = require('playwright');
           (async () => {
             const base = 'https://yuge-u.github.io/zero-one-terminology/';
+            const deadline=Date.now()+90000;
+            let published=false;
+            while(Date.now()<deadline){
+              const response=await fetch(base+'index.html?verify='+process.env.GITHUB_SHA,{cache:'no-store'});
+              if(response.ok()&&Buffer.from(await response.arrayBuffer()).equals(fs.readFileSync('index.html'))){published=true;break;}
+              await new Promise(resolve=>setTimeout(resolve,3000));
+            }
+            assert.ok(published,'Current index.html was not published within the deployment window');
+
             for (const file of ['safari-terminology-180-20261007g.png', 'safari-terminology-192-20261007g.png', 'brand-entry.js', 'favicon.ico', 'favicon-terminology-20261007f.ico', 'favicon-terminology-32-20261007f.png', 'index.html', 'manifest.webmanifest', 'icon.svg', 'icon-180-v2.png', 'icon-192-v2.png', 'icon-512-v2.png']) {
               const response = await fetch(base + file + '?verify=' + process.env.GITHUB_SHA, { cache: 'no-store' });
               assert.equal(response.status, 200, file);
