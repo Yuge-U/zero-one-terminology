@@ -42,16 +42,16 @@ const oldHtml=`<!doctype html><html><head><link rel="icon" href="brand-logo.svg"
     }
     assert(active,'New worker must actively control the retained tab');
    }
-   const fresh=await context.newPage();await fresh.goto(base,{waitUntil:'domcontentloaded'});await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007h',{waitUntil:'domcontentloaded'});await fresh.locator('#new').waitFor();
+   const fresh=await context.newPage();await fresh.goto(base,{waitUntil:'domcontentloaded'});await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007k',{waitUntil:'domcontentloaded'});await fresh.locator('#new').waitFor();
    assert.equal(await old.locator('#draft').inputValue(),'preserved unsaved draft','Old editor must not reload');
    assert.equal(await fresh.evaluate(()=>localStorage.getItem('brand-test-marker')),'preserve');
    assert.equal(await fresh.evaluate(()=>new Promise(resolve=>{const r=indexedDB.open('brand-update-test');r.onsuccess=()=>{const db=r.result;const q=db.transaction('records').objectStore('records').get('plan');q.onsuccess=()=>{db.close();resolve(q.result);};};})),'saved plan');
    const icon=await fresh.locator('link[rel="icon"]').getAttribute('href');assert(icon.includes('20261007g.png'));
-   await fresh.goto(base+'index.html?existing=keep&brand=old#section',{waitUntil:'domcontentloaded'});await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007h',{waitUntil:'domcontentloaded'});const final=new URL(fresh.url());assert.equal(final.searchParams.get('existing'),'keep');assert.equal(final.hash,'#section');assert.equal(new URL('./',final).href,base,'Authentication redirect must remain stable');
+   await fresh.goto(base+'index.html?existing=keep&brand=old#section',{waitUntil:'domcontentloaded'});await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007k',{waitUntil:'domcontentloaded'});const final=new URL(fresh.url());assert.equal(final.searchParams.get('existing'),'keep');assert.equal(final.hash,'#section');assert.equal(new URL('./',final).href,base,'Authentication redirect must remain stable');
    for(const callback of ['?code=synthetic-code&state=synthetic-state','#code=synthetic-code&state=synthetic-state']){
     await fresh.goto(base+callback,{waitUntil:'domcontentloaded'});await fresh.locator('#new').waitFor();assert.equal(fresh.url(),base+callback,'Authentication return must not redirect');
    }
-   await fresh.goto(base,{waitUntil:'domcontentloaded'});await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007h',{waitUntil:'domcontentloaded'});
+   await fresh.goto(base,{waitUntil:'domcontentloaded'});await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007k',{waitUntil:'domcontentloaded'});
    const count=requests.length;await fresh.reload({waitUntil:'domcontentloaded'});await fresh.locator('#new').waitFor();assert(requests.length-count<20,'No redirect loop');
    if(practice){originOnline=false;await fresh.reload({waitUntil:'domcontentloaded'});await fresh.locator('#new').waitFor();originOnline=true;}
    console.log('PASS',engine.name(),app,'normal URL, retained tab/draft, localStorage, IndexedDB, auth URL, parameters, offline shell');

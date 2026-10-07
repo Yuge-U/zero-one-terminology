@@ -45,7 +45,8 @@
         "size": 180,
         "kind": "fallback"
       }
-    ]
+    ],
+    "entryRevision": "20261007k"
   },
   {
     "name": "ROSTER",
@@ -91,7 +92,8 @@
         "size": 180,
         "kind": "fallback"
       }
-    ]
+    ],
+    "entryRevision": "20261007k"
   },
   {
     "name": "PRACTICE",
@@ -134,7 +136,7 @@
         "remote": "apple-touch-icon.png",
         "size": 180,
         "kind": "fallback",
-        "generatedSha256": "c94bcdd5c3f4a3401e994f46cc828f31c898fdf79875d08c69b6a9b7821a5f96"
+        "generatedSha256": "bc5e7fba6d337bc546943cd69c42d5b2a625ae995ea5c66b2062af036b94ded3"
       },
       {
         "local": "production/icons/apple-touch-icon-precomposed.png",
@@ -145,7 +147,8 @@
       }
     ],
     "master": "production/brand/practice-master.png",
-    "masterSha256": "0775d9cff2d939c63177715415b10029c85e5113725331a069a9233a50d90e73"
+    "masterSha256": "0775d9cff2d939c63177715415b10029c85e5113725331a069a9233a50d90e73",
+    "entryRevision": "20261007k"
   },
   {
     "name": "TERMINOLOGY",
@@ -193,6 +196,7 @@
         "size": 180,
         "kind": "fallback"
       }
-    ]
+    ],
+    "entryRevision": "20261007k"
   }
 ]

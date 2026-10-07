@@ -81,7 +81,7 @@ jobs:
               const errors = [];
               page.on('pageerror', e => errors.push(e.message));
               await page.goto(base, { waitUntil: 'networkidle' });
-              await page.waitForURL(url => url.searchParams.get('brand') === '20261007h');
+              await page.waitForURL(url => url.searchParams.get('brand') === '20261007k');
               assert.equal(await page.locator('.zeroone-splash img').getAttribute('src'), 'icon-512-v2.png?v=20261007c');
               await page.waitForFunction(() => document.querySelectorAll('.term').length > 0);
               await page.getByRole('button', { name: '確認しました', exact: true }).click();

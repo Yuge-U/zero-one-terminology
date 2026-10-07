@@ -37,8 +37,8 @@ const profiles = {
           const page=await context.newPage();
           await page.goto(app.url,{waitUntil:'domcontentloaded'});
           await page.locator('link[rel="apple-touch-icon"]').waitFor({state:'attached'});
-          if(['PRACTICE','TERMINOLOGY'].includes(app.name))
-            await page.waitForURL(url=>url.searchParams.get('brand')==='20261007h',{waitUntil:'domcontentloaded'});
+          if(app.entryRevision)
+            await page.waitForURL(url=>url.searchParams.get('brand')===app.entryRevision,{waitUntil:'domcontentloaded'});
           const metadata=await page.evaluate(async()=>{
             const links=[...document.querySelectorAll('link[rel="icon"],link[rel="apple-touch-icon"]')]
               .map(link=>({kind:link.rel==='icon'?'favicon':'apple',url:link.href,type:link.type,sizes:link.sizes.value}));
