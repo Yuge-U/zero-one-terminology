@@ -83,13 +83,15 @@
         "local": "production/icons/safari-practice-180-20261007g.png",
         "remote": "safari-practice-180-20261007g.png",
         "size": 180,
-        "kind": "apple"
+        "kind": "apple",
+        "generatedSha256": "34af9d379733f6de6d49c7b5be8885f9e1a5209cde937bfc07983aca40b59a52"
       },
       {
         "local": "production/icons/safari-practice-192-20261007g.png",
         "remote": "safari-practice-192-20261007g.png",
         "size": 192,
-        "kind": "favicon"
+        "kind": "favicon",
+        "generatedSha256": "2a6bf2a1347830a73be65ff840b721e9909ed09e11af221c6b1342edf06ff2e5"
       },
       {
         "local": "production/icons/icon-192.webp",
@@ -103,7 +105,9 @@
         "size": 512,
         "kind": "manifest"
       }
-    ]
+    ],
+    "master": "production/brand/practice-master.png",
+    "masterSha256": "0775d9cff2d939c63177715415b10029c85e5113725331a069a9233a50d90e73"
   },
   {
     "name": "TERMINOLOGY",

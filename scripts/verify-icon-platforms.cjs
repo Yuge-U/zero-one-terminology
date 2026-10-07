@@ -58,8 +58,13 @@ const profiles = {
             const response=await context.request.get(url);
             assert.equal(response.status(),200,url);
             const bytes=await response.body();
-            const expected=fs.readFileSync(path.join(sourceRoot,app.repo,asset.local));
-            assert.equal(sha(bytes),sha(expected),'Approved artwork differs: '+url);
+            const expectedPath=path.join(sourceRoot,app.repo,asset.local);
+            let expectedHash;
+            if(asset.generatedSha256){
+              assert.equal(sha(fs.readFileSync(path.join(sourceRoot,app.repo,app.master))),app.masterSha256,'Generated icon master changed; update release hashes');
+              expectedHash=asset.generatedSha256;
+            }else expectedHash=sha(fs.readFileSync(expectedPath));
+            assert.equal(sha(bytes),expectedHash,'Approved artwork differs: '+url);
             const dimensions=await page.evaluate(async url=>{const image=new Image();image.src=url;await image.decode();return [image.naturalWidth,image.naturalHeight];},url);
             assert.deepEqual(dimensions,[asset.size,asset.size]);
             assets.push({kind:asset.kind,url,dimensions,sha256:sha(bytes)});
