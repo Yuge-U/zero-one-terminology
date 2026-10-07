@@ -100,6 +100,12 @@ const profiles = {
           const apple=await page.locator('link[rel="apple-touch-icon"]').getAttribute('href');
           assert(apple&&new URL(apple,page.url()).pathname===new URL(app.assets.find(a=>a.kind==='apple').remote,app.url).pathname);
           await page.screenshot({path:`icon-platform-evidence/${profile.name}-${app.name}.png`});
+          if(app.name==='CANVAS'){
+            await page.goto(new URL('Basketball_Tactics_Board.html',app.url).href,{waitUntil:'domcontentloaded'});
+            await page.waitForURL(url=>url.searchParams.get('brand')===app.entryRevision,{waitUntil:'domcontentloaded'});
+            const legacyApple=await page.locator('link[rel="apple-touch-icon"]').getAttribute('href');
+            assert.equal(new URL(legacyApple,page.url()).pathname,new URL(app.assets.find(a=>a.kind==='apple').remote,app.url).pathname,'Legacy CANVAS bookmark image');
+          }
           results.push({profile:profile.name,app:app.name,url:page.url(),assets,identity:app.identity,
             browserVersion:browser.version(),physicalBrowserChromeVerified:false});
           console.log('PASS',profile.name,app.name);
