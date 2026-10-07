@@ -6,6 +6,8 @@ on:
       - branding/terminology-master.png
       - scripts/render-favicon.cjs
       - scripts/render-icons.cjs
+      - scripts/verify-entry.cjs
+      - index.html
       - package.json
       - package-lock.json
       - .github/workflows/render-icons.yml
@@ -24,6 +26,18 @@ jobs:
       - run: npm run build
       - name: Verify committed icons match high-resolution source
         run: git diff --exit-code -- safari-terminology-180-20261007g.png safari-terminology-192-20261007g.png favicon.ico favicon-terminology-20261007f.ico favicon-terminology-32-20261007f.png icon.svg icon-180-v2.png icon-192-v2.png icon-512-v2.png
+  verify-entry:
+    needs: render
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: node scripts/verify-entry.cjs
   verify-production:
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     needs: render
@@ -57,6 +71,7 @@ jobs:
               const errors = [];
               page.on('pageerror', e => errors.push(e.message));
               await page.goto(base, { waitUntil: 'networkidle' });
+              await page.waitForURL(url => url.searchParams.get('brand') === '20261007h');
               assert.equal(await page.locator('.zeroone-splash img').getAttribute('src'), 'icon-512-v2.png?v=20261007c');
               await page.waitForFunction(() => document.querySelectorAll('.term').length > 0);
               await page.getByRole('button', { name: '確認しました', exact: true }).click();
