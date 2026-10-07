@@ -19,6 +19,13 @@ const profiles = {
   const group=process.env.ICON_PLATFORM || 'local';
   assert(profiles[group],'Unknown platform');
   fs.mkdirSync('icon-platform-evidence',{recursive:true});
+  const helperPath='downloads/ZERO-ONE-Mac-Safari-Icons.zip';
+  const helperURL=new URL(helperPath,configs.find(app=>app.name==='TERMINOLOGY').url);
+  const helperResponse=await fetch(helperURL,{cache:'no-store'});
+  assert.equal(helperResponse.status,200,'Safari helper download');
+  const helperBytes=Buffer.from(await helperResponse.arrayBuffer());
+  assert.equal(sha(helperBytes),sha(fs.readFileSync(helperPath)),'Published Safari helper differs from reviewed package');
+  console.log('PASS published Safari helper download');
   const results=[];
   for(const profile of profiles[group]){
     const browser=await profile.engine.launch({channel:profile.channel,
