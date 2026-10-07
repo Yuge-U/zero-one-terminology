@@ -1,0 +1,144 @@
+[
+  {
+    "name": "CANVAS",
+    "repo": "basketball-tactics-board",
+    "url": "https://yuge-u.github.io/basketball-tactics-board/",
+    "identity": {
+      "id": "../index.html",
+      "start_url": "../index.html",
+      "scope": "../"
+    },
+    "assets": [
+      {
+        "local": "1_App/img/zeroone_icon_180.png",
+        "remote": "1_App/img/zeroone_icon_180.png",
+        "size": 180,
+        "kind": "apple"
+      },
+      {
+        "local": "1_App/img/zeroone_icon_192.png",
+        "remote": "1_App/img/zeroone_icon_192.png",
+        "size": 192,
+        "kind": "favicon"
+      },
+      {
+        "local": "1_App/img/zeroone_icon_192.png",
+        "remote": "1_App/img/zeroone_icon_192.png",
+        "size": 192,
+        "kind": "manifest"
+      },
+      {
+        "local": "1_App/img/zeroone_icon_512.png",
+        "remote": "1_App/img/zeroone_icon_512.png",
+        "size": 512,
+        "kind": "manifest"
+      }
+    ]
+  },
+  {
+    "name": "ROSTER",
+    "repo": "zero-one-roster",
+    "url": "https://yuge-u.github.io/zero-one-roster/",
+    "identity": {
+      "start_url": "./"
+    },
+    "assets": [
+      {
+        "local": "safari-roster-180-20261007g.png",
+        "remote": "safari-roster-180-20261007g.png",
+        "size": 180,
+        "kind": "apple"
+      },
+      {
+        "local": "safari-roster-192-20261007g.png",
+        "remote": "safari-roster-192-20261007g.png",
+        "size": 192,
+        "kind": "favicon"
+      },
+      {
+        "local": "icons/roster-192.png",
+        "remote": "icons/roster-192.png",
+        "size": 192,
+        "kind": "manifest"
+      },
+      {
+        "local": "icons/roster-512.png",
+        "remote": "icons/roster-512.png",
+        "size": 512,
+        "kind": "manifest"
+      }
+    ]
+  },
+  {
+    "name": "PRACTICE",
+    "repo": "zero-one-practice-lab",
+    "url": "https://yuge-u.github.io/zero-one-practice-lab/",
+    "identity": {
+      "id": "./",
+      "start_url": "./",
+      "scope": "./"
+    },
+    "assets": [
+      {
+        "local": "production/icons/safari-practice-180-20261007g.png",
+        "remote": "safari-practice-180-20261007g.png",
+        "size": 180,
+        "kind": "apple"
+      },
+      {
+        "local": "production/icons/safari-practice-192-20261007g.png",
+        "remote": "safari-practice-192-20261007g.png",
+        "size": 192,
+        "kind": "favicon"
+      },
+      {
+        "local": "production/icons/icon-192.webp",
+        "remote": "icons/icon-192.webp",
+        "size": 192,
+        "kind": "manifest"
+      },
+      {
+        "local": "production/icons/icon-512.webp",
+        "remote": "icons/icon-512.webp",
+        "size": 512,
+        "kind": "manifest"
+      }
+    ]
+  },
+  {
+    "name": "TERMINOLOGY",
+    "repo": "zero-one-terminology",
+    "url": "https://yuge-u.github.io/zero-one-terminology/",
+    "identity": {
+      "id": "./",
+      "start_url": "./",
+      "scope": "./"
+    },
+    "assets": [
+      {
+        "local": "safari-terminology-180-20261007g.png",
+        "remote": "safari-terminology-180-20261007g.png",
+        "size": 180,
+        "kind": "apple"
+      },
+      {
+        "local": "safari-terminology-192-20261007g.png",
+        "remote": "safari-terminology-192-20261007g.png",
+        "size": 192,
+        "kind": "favicon"
+      },
+      {
+        "local": "icon-192-v2.png",
+        "remote": "icon-192-v2.png",
+        "size": 192,
+        "kind": "manifest"
+      },
+      {
+        "local": "icon-512-v2.png",
+        "remote": "icon-512-v2.png",
+        "size": 512,
+        "kind": "manifest"
+      }
+    ]
+  }
+]

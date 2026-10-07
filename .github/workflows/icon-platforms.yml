@@ -1,0 +1,76 @@
+name: Four-app icon compatibility
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/verify-icon-platforms.cjs'
+      - 'scripts/icon-platforms.json'
+      - '.github/workflows/icon-platforms.yml'
+      - 'index.html'
+      - 'manifest.webmanifest'
+      - 'brand-entry.js'
+      - 'icon*'
+      - 'safari-*.png'
+      - 'favicon*'
+permissions:
+  contents: read
+jobs:
+  icons:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: macos-15, platform: mac}
+          - {os: windows-2025, platform: windows}
+          - {os: ubuntu-24.04, platform: mobile}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Yuge-U/zero-one-terminology
+          ref: main
+          path: icon-sources/zero-one-terminology
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Yuge-U/zero-one-roster
+          ref: main
+          path: icon-sources/zero-one-roster
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Yuge-U/basketball-tactics-board
+          ref: main
+          path: icon-sources/basketball-tactics-board
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Yuge-U/zero-one-practice-lab
+          ref: main
+          path: icon-sources/zero-one-practice-lab
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+        working-directory: icon-sources/zero-one-terminology
+      - if: matrix.platform != 'windows'
+        run: npx playwright install --with-deps chromium webkit
+        working-directory: icon-sources/zero-one-terminology
+      - if: matrix.platform == 'windows'
+        run: npx playwright install chrome msedge
+        working-directory: icon-sources/zero-one-terminology
+      - name: Verify public icons and PWA identity
+        run: node scripts/verify-icon-platforms.cjs
+        working-directory: icon-sources/zero-one-terminology
+        env:
+          ICON_PLATFORM: ${{ matrix.platform }}
+          ICON_SOURCE_ROOT: ${{ github.workspace }}/icon-sources
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: icon-platform-${{ matrix.platform }}
+          path: icon-sources/zero-one-terminology/icon-platform-evidence/
