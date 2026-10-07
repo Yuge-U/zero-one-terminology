@@ -26,6 +26,25 @@ const profiles = {
   const helperBytes=Buffer.from(await helperResponse.arrayBuffer());
   assert.equal(sha(helperBytes),sha(fs.readFileSync(helperPath)),'Published Safari helper differs from reviewed package');
   console.log('PASS published Safari helper download');
+  // Legacy Pages deployments do not reliably emit workflow_run events. Push checks
+  // wait for the expected public declarations before opening browser profiles.
+  for(const app of configs){
+    const deadline=Date.now()+240000;
+    let ready=false;
+    while(Date.now()<deadline){
+      try{
+        const nonce=String(Date.now());
+        const response=await fetch(app.url+'?icon-publication='+nonce,{cache:'no-store'});
+        const html=await response.text();
+        const entry=await fetch(new URL('brand-entry.js?icon-publication='+nonce,app.url),{cache:'no-store'});
+        const entryText=await entry.text();
+        const apple=app.assets.find(asset=>asset.kind==='apple');
+        if(response.ok&&entry.ok&&html.includes(apple.remote)&&entryText.includes(app.entryRevision)){ready=true;break;}
+      }catch{}
+      await new Promise(resolve=>setTimeout(resolve,3000));
+    }
+    assert(ready,'Expected public bookmark declarations did not arrive: '+app.name);
+  }
   const results=[];
   for(const profile of profiles[group]){
     const browser=await profile.engine.launch({channel:profile.channel,
