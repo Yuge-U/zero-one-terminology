@@ -63,7 +63,7 @@ jobs:
             let published=false;
             while(Date.now()<deadline){
               const response=await fetch(base+'index.html?verify='+process.env.GITHUB_SHA,{cache:'no-store'});
-              if(response.ok()&&Buffer.from(await response.arrayBuffer()).equals(fs.readFileSync('index.html'))){published=true;break;}
+              if(response.ok&&Buffer.from(await response.arrayBuffer()).equals(fs.readFileSync('index.html'))){published=true;break;}
               await new Promise(resolve=>setTimeout(resolve,3000));
             }
             assert.ok(published,'Current index.html was not published within the deployment window');
