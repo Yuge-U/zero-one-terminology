@@ -33,7 +33,7 @@ const oldHtml=`<!doctype html><html><head><link rel="icon" href="brand-logo.svg"
    if(practice){await old.evaluate(async()=>{await navigator.serviceWorker.ready;});await old.reload();await old.locator('#draft').fill('preserved unsaved draft');await old.waitForFunction(()=>navigator.serviceWorker.controller);}
    upgraded=true;
    if(practice){await old.evaluate(async()=>{await(await navigator.serviceWorker.getRegistration()).update();});await old.waitForFunction(async()=>{const r=await navigator.serviceWorker.getRegistration();return r?.active&&!(r.waiting||r.installing)&&(await caches.keys()).includes('zero-one-practice-lab-1.3.4-brand-20261007h');},null,{timeout:15000});}
-   const fresh=await context.newPage();await fresh.goto(base);await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007h');await fresh.locator('#new').waitFor();
+   const fresh=await context.newPage();fresh.on('console',m=>{if(m.type()==='error')console.log('BROWSER',engine.name(),m.text());});fresh.on('pageerror',e=>console.log('PAGE ERROR',e.message));await fresh.goto(base);await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007h');await fresh.locator('#new').waitFor();
    assert.equal(await old.locator('#draft').inputValue(),'preserved unsaved draft','Old editor must not reload');
    assert.equal(await fresh.evaluate(()=>localStorage.getItem('brand-test-marker')),'preserve');
    assert.equal(await fresh.evaluate(()=>new Promise(resolve=>{const r=indexedDB.open('brand-update-test');r.onsuccess=()=>{const db=r.result;const q=db.transaction('records').objectStore('records').get('plan');q.onsuccess=()=>{db.close();resolve(q.result);};};})),'saved plan');

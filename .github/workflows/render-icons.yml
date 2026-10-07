@@ -8,6 +8,7 @@ on:
       - scripts/render-icons.cjs
       - scripts/verify-entry.cjs
       - index.html
+      - brand-entry.js
       - package.json
       - package-lock.json
       - .github/workflows/render-icons.yml
@@ -58,7 +59,7 @@ jobs:
           const { chromium, webkit } = require('playwright');
           (async () => {
             const base = 'https://yuge-u.github.io/zero-one-terminology/';
-            for (const file of ['safari-terminology-180-20261007g.png', 'safari-terminology-192-20261007g.png', 'favicon.ico', 'favicon-terminology-20261007f.ico', 'favicon-terminology-32-20261007f.png', 'index.html', 'manifest.webmanifest', 'icon.svg', 'icon-180-v2.png', 'icon-192-v2.png', 'icon-512-v2.png']) {
+            for (const file of ['safari-terminology-180-20261007g.png', 'safari-terminology-192-20261007g.png', 'brand-entry.js', 'favicon.ico', 'favicon-terminology-20261007f.ico', 'favicon-terminology-32-20261007f.png', 'index.html', 'manifest.webmanifest', 'icon.svg', 'icon-180-v2.png', 'icon-192-v2.png', 'icon-512-v2.png']) {
               const response = await fetch(base + file + '?verify=' + process.env.GITHUB_SHA, { cache: 'no-store' });
               assert.equal(response.status, 200, file);
               assert.deepEqual(Buffer.from(await response.arrayBuffer()), fs.readFileSync(file), file + ' differs from deployed commit');
