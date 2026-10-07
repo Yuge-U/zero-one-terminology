@@ -56,7 +56,7 @@ const profiles = {
           const assets=[];
           for(const asset of app.assets){
             const wanted=new URL(asset.remote,app.url);
-            const refs=asset.kind==='manifest'?manifest.icons.map(icon=>new URL(icon.src,metadata.manifestURL).href):
+            const refs=asset.kind==='fallback'?[wanted.href]:asset.kind==='manifest'?manifest.icons.map(icon=>new URL(icon.src,metadata.manifestURL).href):
               metadata.links.filter(link=>link.kind===asset.kind).map(link=>link.url);
             const url=refs.find(ref=>new URL(ref).pathname===wanted.pathname);
             assert(url,app.name+' missing '+asset.kind+' '+wanted.pathname);

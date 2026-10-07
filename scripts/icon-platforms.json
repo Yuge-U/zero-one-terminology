@@ -10,14 +10,14 @@
     },
     "assets": [
       {
-        "local": "1_App/img/zeroone_icon_180.png",
-        "remote": "1_App/img/zeroone_icon_180.png",
+        "local": "apple-touch-canvas-180-20261007k.png",
+        "remote": "apple-touch-canvas-180-20261007k.png",
         "size": 180,
         "kind": "apple"
       },
       {
-        "local": "1_App/img/zeroone_icon_192.png",
-        "remote": "1_App/img/zeroone_icon_192.png",
+        "local": "safari-canvas-192-20261007j.png",
+        "remote": "safari-canvas-192-20261007j.png",
         "size": 192,
         "kind": "favicon"
       },
@@ -32,6 +32,18 @@
         "remote": "1_App/img/zeroone_icon_512.png",
         "size": 512,
         "kind": "manifest"
+      },
+      {
+        "local": "apple-touch-icon.png",
+        "remote": "apple-touch-icon.png",
+        "size": 180,
+        "kind": "fallback"
+      },
+      {
+        "local": "apple-touch-icon-precomposed.png",
+        "remote": "apple-touch-icon-precomposed.png",
+        "size": 180,
+        "kind": "fallback"
       }
     ]
   },
@@ -44,8 +56,8 @@
     },
     "assets": [
       {
-        "local": "safari-roster-180-20261007g.png",
-        "remote": "safari-roster-180-20261007g.png",
+        "local": "apple-touch-roster-180-20261007k.png",
+        "remote": "apple-touch-roster-180-20261007k.png",
         "size": 180,
         "kind": "apple"
       },
@@ -66,6 +78,18 @@
         "remote": "icons/roster-512.png",
         "size": 512,
         "kind": "manifest"
+      },
+      {
+        "local": "apple-touch-icon.png",
+        "remote": "apple-touch-icon.png",
+        "size": 180,
+        "kind": "fallback"
+      },
+      {
+        "local": "apple-touch-icon-precomposed.png",
+        "remote": "apple-touch-icon-precomposed.png",
+        "size": 180,
+        "kind": "fallback"
       }
     ]
   },
@@ -80,8 +104,8 @@
     },
     "assets": [
       {
-        "local": "production/icons/safari-practice-180-20261007g.png",
-        "remote": "safari-practice-180-20261007g.png",
+        "local": "production/icons/apple-touch-practice-180-20261007k.png",
+        "remote": "apple-touch-practice-180-20261007k.png",
         "size": 180,
         "kind": "apple",
         "generatedSha256": "34af9d379733f6de6d49c7b5be8885f9e1a5209cde937bfc07983aca40b59a52"
@@ -104,6 +128,20 @@
         "remote": "icons/icon-512.webp",
         "size": 512,
         "kind": "manifest"
+      },
+      {
+        "local": "production/icons/apple-touch-icon.png",
+        "remote": "apple-touch-icon.png",
+        "size": 180,
+        "kind": "fallback",
+        "generatedSha256": "c94bcdd5c3f4a3401e994f46cc828f31c898fdf79875d08c69b6a9b7821a5f96"
+      },
+      {
+        "local": "production/icons/apple-touch-icon-precomposed.png",
+        "remote": "apple-touch-icon-precomposed.png",
+        "size": 180,
+        "kind": "fallback",
+        "generatedSha256": "34af9d379733f6de6d49c7b5be8885f9e1a5209cde937bfc07983aca40b59a52"
       }
     ],
     "master": "production/brand/practice-master.png",
@@ -120,8 +158,8 @@
     },
     "assets": [
       {
-        "local": "safari-terminology-180-20261007g.png",
-        "remote": "safari-terminology-180-20261007g.png",
+        "local": "apple-touch-terminology-180-20261007k.png",
+        "remote": "apple-touch-terminology-180-20261007k.png",
         "size": 180,
         "kind": "apple"
       },
@@ -142,6 +180,18 @@
         "remote": "icon-512-v2.png",
         "size": 512,
         "kind": "manifest"
+      },
+      {
+        "local": "apple-touch-icon.png",
+        "remote": "apple-touch-icon.png",
+        "size": 180,
+        "kind": "fallback"
+      },
+      {
+        "local": "apple-touch-icon-precomposed.png",
+        "remote": "apple-touch-icon-precomposed.png",
+        "size": 180,
+        "kind": "fallback"
       }
     ]
   }
