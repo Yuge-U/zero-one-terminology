@@ -28,10 +28,10 @@ const oldHtml=`<!doctype html><html><head><link rel="icon" href="brand-logo.svg"
   const base=`http://127.0.0.1:${server.address().port}/${app}/`;
   const browser=await engine.launch(process.env.CHROMIUM_PATH && engine.name()==="chromium" ? {executablePath:process.env.CHROMIUM_PATH} : {});
   try{
-   const context=await browser.newContext();const old=await context.newPage();await old.goto(base);
+   const context=await browser.newContext();const old=await context.newPage();await old.goto(base,{waitUntil:'domcontentloaded'});
    await old.locator('#draft').fill('preserved unsaved draft');
    await old.evaluate(async()=>{await new Promise((resolve,reject)=>{const req=indexedDB.open('brand-update-test',1);req.onupgradeneeded=()=>req.result.createObjectStore('records');req.onerror=()=>reject(req.error);req.onsuccess=()=>{const db=req.result;const tx=db.transaction('records','readwrite');tx.objectStore('records').put('saved plan','plan');tx.oncomplete=()=>{db.close();resolve();};};});});
-   if(practice){await old.evaluate(async()=>{await navigator.serviceWorker.ready;});await old.reload();await old.locator('#draft').fill('preserved unsaved draft');await old.waitForFunction(()=>navigator.serviceWorker.controller);}
+   if(practice){await old.evaluate(async()=>{await navigator.serviceWorker.ready;});await old.reload({waitUntil:'domcontentloaded'});await old.locator('#draft').fill('preserved unsaved draft');await old.waitForFunction(()=>navigator.serviceWorker.controller);}
    upgraded=true;
    if(practice){
     await old.evaluate(async()=>{await(await navigator.serviceWorker.getRegistration()).update();});
@@ -42,18 +42,18 @@ const oldHtml=`<!doctype html><html><head><link rel="icon" href="brand-logo.svg"
     }
     assert(active,'New worker must actively control the retained tab');
    }
-   const fresh=await context.newPage();await fresh.goto(base);await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007h');await fresh.locator('#new').waitFor();
+   const fresh=await context.newPage();await fresh.goto(base,{waitUntil:'domcontentloaded'});await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007h',{waitUntil:'domcontentloaded'});await fresh.locator('#new').waitFor();
    assert.equal(await old.locator('#draft').inputValue(),'preserved unsaved draft','Old editor must not reload');
    assert.equal(await fresh.evaluate(()=>localStorage.getItem('brand-test-marker')),'preserve');
    assert.equal(await fresh.evaluate(()=>new Promise(resolve=>{const r=indexedDB.open('brand-update-test');r.onsuccess=()=>{const db=r.result;const q=db.transaction('records').objectStore('records').get('plan');q.onsuccess=()=>{db.close();resolve(q.result);};};})),'saved plan');
    const icon=await fresh.locator('link[rel="icon"]').getAttribute('href');assert(icon.includes('20261007g.png'));
-   await fresh.goto(base+'index.html?existing=keep&brand=old#section');await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007h');const final=new URL(fresh.url());assert.equal(final.searchParams.get('existing'),'keep');assert.equal(final.hash,'#section');assert.equal(new URL('./',final).href,base,'Authentication redirect must remain stable');
+   await fresh.goto(base+'index.html?existing=keep&brand=old#section',{waitUntil:'domcontentloaded'});await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007h',{waitUntil:'domcontentloaded'});const final=new URL(fresh.url());assert.equal(final.searchParams.get('existing'),'keep');assert.equal(final.hash,'#section');assert.equal(new URL('./',final).href,base,'Authentication redirect must remain stable');
    for(const callback of ['?code=synthetic-code&state=synthetic-state','#code=synthetic-code&state=synthetic-state']){
-    await fresh.goto(base+callback);await fresh.locator('#new').waitFor();assert.equal(fresh.url(),base+callback,'Authentication return must not redirect');
+    await fresh.goto(base+callback,{waitUntil:'domcontentloaded'});await fresh.locator('#new').waitFor();assert.equal(fresh.url(),base+callback,'Authentication return must not redirect');
    }
-   await fresh.goto(base);await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007h');
-   const count=requests.length;await fresh.reload();await fresh.locator('#new').waitFor();assert(requests.length-count<20,'No redirect loop');
-   if(practice){originOnline=false;await fresh.reload();await fresh.locator('#new').waitFor();originOnline=true;}
+   await fresh.goto(base,{waitUntil:'domcontentloaded'});await fresh.waitForURL(u=>u.searchParams.get('brand')==='20261007h',{waitUntil:'domcontentloaded'});
+   const count=requests.length;await fresh.reload({waitUntil:'domcontentloaded'});await fresh.locator('#new').waitFor();assert(requests.length-count<20,'No redirect loop');
+   if(practice){originOnline=false;await fresh.reload({waitUntil:'domcontentloaded'});await fresh.locator('#new').waitFor();originOnline=true;}
    console.log('PASS',engine.name(),app,'normal URL, retained tab/draft, localStorage, IndexedDB, auth URL, parameters, offline shell');
    await context.close();
   }finally{await browser.close();await new Promise(r=>server.close(r));}
