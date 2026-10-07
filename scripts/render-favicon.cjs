@@ -27,5 +27,6 @@ module.exports = async function renderFavicon(source, root, name) {
   await fs.writeFile(path.join(root,'favicon.ico'),ico);
   await sharp(source).resize(32,32,{withoutEnlargement:true,kernel:'lanczos3'}).png().toFile(path.join(root,`favicon-${name}-32-20261007f.png`));
   for (const size of [180,192]) await sharp(source).resize(size,size,{withoutEnlargement:true,kernel:"lanczos3"}).png().toFile(path.join(root,`safari-${name}-${size}-20261007g.png`));
-  for (const file of [`apple-touch-${name}-180-20261007k.png`,'apple-touch-icon.png','apple-touch-icon-precomposed.png']) await fs.copyFile(path.join(root,`safari-${name}-180-20261007g.png`),path.join(root,file));
+  const bookmark = await sharp(await fs.readFile(path.join(root,'branding/zero-one-bookmark-master.jpg'))).resize(180,180,{fit:'contain',background:'#000000',withoutEnlargement:true,kernel:'lanczos3'}).png().toBuffer();
+  for (const file of ['apple-touch-zero-one-180-20261007m.png','apple-touch-icon.png','apple-touch-icon-precomposed.png']) await fs.writeFile(path.join(root,file),bookmark);
 };

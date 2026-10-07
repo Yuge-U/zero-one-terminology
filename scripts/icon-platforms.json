@@ -10,8 +10,8 @@
     },
     "assets": [
       {
-        "local": "apple-touch-canvas-180-20261007k.png",
-        "remote": "apple-touch-canvas-180-20261007k.png",
+        "local": "apple-touch-zero-one-180-20261007m.png",
+        "remote": "apple-touch-zero-one-180-20261007m.png",
         "size": 180,
         "kind": "apple"
       },
@@ -57,8 +57,8 @@
     },
     "assets": [
       {
-        "local": "apple-touch-roster-180-20261007k.png",
-        "remote": "apple-touch-roster-180-20261007k.png",
+        "local": "apple-touch-zero-one-180-20261007m.png",
+        "remote": "apple-touch-zero-one-180-20261007m.png",
         "size": 180,
         "kind": "apple"
       },
@@ -106,11 +106,11 @@
     },
     "assets": [
       {
-        "local": "production/icons/apple-touch-practice-180-20261007k.png",
-        "remote": "apple-touch-practice-180-20261007k.png",
+        "local": "production/icons/apple-touch-zero-one-180-20261007m.png",
+        "remote": "apple-touch-zero-one-180-20261007m.png",
         "size": 180,
         "kind": "apple",
-        "generatedSha256": "34af9d379733f6de6d49c7b5be8885f9e1a5209cde937bfc07983aca40b59a52"
+        "generatedSha256": "2a67fb30e4d25670d28f9517dad80525f1bd44f1081147e3586e5b58725b2f1e"
       },
       {
         "local": "production/icons/safari-practice-192-20261007g.png",
@@ -136,14 +136,14 @@
         "remote": "apple-touch-icon.png",
         "size": 180,
         "kind": "fallback",
-        "generatedSha256": "bc5e7fba6d337bc546943cd69c42d5b2a625ae995ea5c66b2062af036b94ded3"
+        "generatedSha256": "2a67fb30e4d25670d28f9517dad80525f1bd44f1081147e3586e5b58725b2f1e"
       },
       {
         "local": "production/icons/apple-touch-icon-precomposed.png",
         "remote": "apple-touch-icon-precomposed.png",
         "size": 180,
         "kind": "fallback",
-        "generatedSha256": "34af9d379733f6de6d49c7b5be8885f9e1a5209cde937bfc07983aca40b59a52"
+        "generatedSha256": "2a67fb30e4d25670d28f9517dad80525f1bd44f1081147e3586e5b58725b2f1e"
       }
     ],
     "master": "production/brand/practice-master.png",
@@ -161,8 +161,8 @@
     },
     "assets": [
       {
-        "local": "apple-touch-terminology-180-20261007k.png",
-        "remote": "apple-touch-terminology-180-20261007k.png",
+        "local": "apple-touch-zero-one-180-20261007m.png",
+        "remote": "apple-touch-zero-one-180-20261007m.png",
         "size": 180,
         "kind": "apple"
       },

@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
   push:
     paths:
+      - branding/zero-one-bookmark-master.jpg
       - branding/terminology-master.png
       - scripts/render-favicon.cjs
       - scripts/render-icons.cjs
@@ -26,7 +27,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Verify committed icons match high-resolution source
-        run: git diff --exit-code -- apple-touch-terminology-180-20261007k.png apple-touch-icon.png apple-touch-icon-precomposed.png safari-terminology-180-20261007g.png safari-terminology-192-20261007g.png favicon.ico favicon-terminology-20261007f.ico favicon-terminology-32-20261007f.png icon.svg icon-180-v2.png icon-192-v2.png icon-512-v2.png
+        run: git diff --exit-code -- apple-touch-zero-one-180-20261007m.png apple-touch-icon.png apple-touch-icon-precomposed.png safari-terminology-180-20261007g.png safari-terminology-192-20261007g.png favicon.ico favicon-terminology-20261007f.ico favicon-terminology-32-20261007f.png icon.svg icon-180-v2.png icon-192-v2.png icon-512-v2.png
   verify-entry:
     needs: render
     runs-on: ubuntu-latest
@@ -68,7 +69,7 @@ jobs:
             }
             assert.ok(published,'Current index.html was not published within the deployment window');
 
-            for (const file of ['apple-touch-terminology-180-20261007k.png', 'apple-touch-icon.png', 'apple-touch-icon-precomposed.png', 'safari-terminology-180-20261007g.png', 'safari-terminology-192-20261007g.png', 'brand-entry.js', 'favicon.ico', 'favicon-terminology-20261007f.ico', 'favicon-terminology-32-20261007f.png', 'index.html', 'manifest.webmanifest', 'icon.svg', 'icon-180-v2.png', 'icon-192-v2.png', 'icon-512-v2.png']) {
+            for (const file of ['apple-touch-zero-one-180-20261007m.png', 'apple-touch-icon.png', 'apple-touch-icon-precomposed.png', 'safari-terminology-180-20261007g.png', 'safari-terminology-192-20261007g.png', 'brand-entry.js', 'favicon.ico', 'favicon-terminology-20261007f.ico', 'favicon-terminology-32-20261007f.png', 'index.html', 'manifest.webmanifest', 'icon.svg', 'icon-180-v2.png', 'icon-192-v2.png', 'icon-512-v2.png']) {
               const response = await fetch(base + file + '?verify=' + process.env.GITHUB_SHA, { cache: 'no-store' });
               assert.equal(response.status, 200, file);
               assert.deepEqual(Buffer.from(await response.arrayBuffer()), fs.readFileSync(file), file + ' differs from deployed commit');
