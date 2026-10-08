@@ -88,56 +88,77 @@
     }
   }
 
-  function create({ mount, connect, retry = connect, switchAccount, signOut, settings, presentation = 'bar' }) {
+  function create({ mount, connect, retry = connect, switchAccount, signOut, settings, settingsLabel = 'バックアップ・保存設定', sync, syncId, extra, presentation = 'compact' }) {
     const host = typeof mount === 'string' ? document.querySelector(mount) : mount;
     if (!host) throw new Error('OneDrive接続表示の場所がありません。');
     host.classList.add('zero-one-connection');
     host.classList.toggle('zoc-compact', presentation === 'compact');
-    host.innerHTML = '<div class="zoc-copy"><div class="zoc-line"><strong>OneDrive</strong><span class="zoc-status" role="status" aria-live="polite"></span></div><span class="zoc-account"></span></div><button class="zoc-primary" type="button"></button>';
+    host.innerHTML = '<div class="zoc-copy"><div class="zoc-line"><strong>OneDrive</strong><span class="zoc-status" role="status" aria-live="polite"></span></div><span class="zoc-account"></span></div><button class="zoc-primary" type="button" aria-haspopup="dialog"></button>';
     const status = host.querySelector('.zoc-status'), account = host.querySelector('.zoc-account'), button = host.querySelector('button');
-    if (presentation === 'compact') {
-      button.innerHTML = '<span class="zoc-cloud" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18H6a4 4 0 0 1-.5-8 6.5 6.5 0 0 1 12.4-1.4A4.8 4.8 0 0 1 19 18h-2"/><path d="M9 18h6"/></svg><span class="zoc-indicator"></span></span><span class="zoc-caption" aria-hidden="true"></span>';
-    }
+    if (presentation === 'compact') button.innerHTML = '<span class="zoc-cloud" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18H6a4 4 0 0 1-.5-8 6.5 6.5 0 0 1 12.4-1.4A4.8 4.8 0 0 1 19 18h-2"/><path d="M9 18h6"/></svg><span class="zoc-indicator"></span></span><span class="zoc-caption" aria-hidden="true"></span>';
     const dialog = document.createElement('dialog'); dialog.className = 'zoc-dialog'; dialog.setAttribute('aria-labelledby', 'zoc-dialog-title');
-    dialog.innerHTML = '<div class="zoc-dialog-head"><h2 id="zoc-dialog-title">OneDrive 接続設定</h2><button type="button" class="zoc-close" aria-label="閉じる">×</button></div><p class="zoc-dialog-status" role="status" aria-live="polite"></p><p class="zoc-dialog-account"></p><p class="zoc-dialog-detail"></p><div class="zoc-dialog-actions"><button type="button" class="zoc-switch">アカウントを変更</button><button type="button" class="zoc-signout">サインアウト</button><button type="button" class="zoc-more">アプリの接続設定</button></div><p class="zoc-note">OneDriveに保存したデータは、サインアウトしても削除されません。</p>';
+    dialog.innerHTML = '<div class="zoc-dialog-head"><h2 id="zoc-dialog-title">OneDrive・バックアップ</h2><button type="button" class="zoc-close" aria-label="閉じる">×</button></div><p class="zoc-dialog-status" role="status" aria-live="polite"></p><p class="zoc-dialog-account"></p><p class="zoc-dialog-detail"></p><p class="zoc-dialog-sync" role="status" aria-live="polite"></p><div class="zoc-extra"></div><div class="zoc-dialog-actions"><button type="button" class="zoc-connect"></button><button type="button" class="zoc-sync">今すぐ同期</button><button type="button" class="zoc-more"></button><button type="button" class="zoc-switch">アカウントを変更</button><button type="button" class="zoc-signout">サインアウト</button></div><p class="zoc-note">OneDriveに保存したデータは、サインアウトしても削除されません。</p>';
     document.body.append(dialog);
-    let current = { state: 'checking' }, actionFlight = null;
+    const syncButton = dialog.querySelector('.zoc-sync');
+    if (syncId) syncButton.id = syncId;
+    if (extra) { const content = typeof extra === 'string' ? document.querySelector(extra) : extra; if (content) dialog.querySelector('.zoc-extra').append(content); }
+    dialog.querySelector('.zoc-more').textContent = settingsLabel;
+    let current = { state: 'checking' }, actionFlight = null, actionKind = '';
     function update(next) {
       current = { ...next };
-      const state = actionFlight ? 'connecting' : labels[current.state] ? current.state : 'error';
+      const state = actionFlight && actionKind === 'connect' ? 'connecting' : labels[current.state] ? current.state : 'disconnected';
       const busy = Boolean(actionFlight || current.busy || state === 'checking' || state === 'connecting');
-      host.dataset.state = state;
-      status.textContent = labels[state];
+      const syncing = current.sync || {};
+      const syncState = state === 'connected' ? (actionKind === 'sync' && actionFlight ? 'busy' : syncing.state || 'idle') : '';
+      const captions = { busy: '同期中', pending: '同期待ち', synced: '同期済み', error: '同期未完', offline: 'オフライン', conflict: '要確認' };
+      const caption = captions[syncState] || { connected: '接続済み', disconnected: '未接続', auth: '再接続', permission: '許可が必要', error: '要確認', checking: '確認中', connecting: '接続中' }[state];
+      host.dataset.state = state; host.dataset.sync = syncState;
+      status.textContent = labels[state] + (captions[syncState] ? ' · ' + caption : '');
       account.textContent = current.username || (state === 'disconnected' ? 'この端末のみで利用中' : current.detail || '');
       account.title = current.username || '';
-      const actionLabel = state === 'connected' ? '接続設定' : state === 'auth' ? '再接続' : state === 'permission' ? 'アクセス許可を確認' : state === 'error' ? '再試行' : state === 'checking' ? '確認中…' : state === 'connecting' ? '接続中…' : 'OneDriveに接続';
+      const actionLabel = state === 'auth' ? '再接続' : state === 'permission' ? 'アクセス許可を確認' : state === 'error' ? '再試行' : 'OneDriveに接続';
       if (presentation === 'compact') {
-        button.querySelector('.zoc-caption').textContent = { connected: '接続済み', disconnected: '未接続', auth: '再接続', permission: '許可が必要', error: '要確認', checking: '確認中', connecting: '接続中' }[state];
-        button.querySelector('.zoc-indicator').textContent = { connected: '✓', disconnected: '＋', auth: '!', permission: '!', error: '!', checking: '…', connecting: '…' }[state];
-      } else button.textContent = actionLabel;
-      button.setAttribute('aria-label', 'OneDrive：' + labels[state] + '。' + actionLabel);
-      button.title = 'OneDrive · ' + labels[state] + (current.username ? '\n' + current.username : '') + '\n' + actionLabel;
-      if (state === 'connected') button.setAttribute('aria-haspopup', 'dialog');
-      else button.removeAttribute('aria-haspopup');
-      button.disabled = busy || current.disabled === true;
+        button.querySelector('.zoc-caption').textContent = caption;
+        button.querySelector('.zoc-indicator').textContent = syncState === 'busy' ? '↻' : syncState === 'pending' ? '↑' : ['error', 'offline', 'conflict'].includes(syncState) ? '!' : { connected: '✓', disconnected: '＋', auth: '!', permission: '!', error: '!', checking: '…', connecting: '…' }[state];
+      } else button.textContent = caption + ' · 設定';
+      button.setAttribute('aria-label', 'OneDrive：' + status.textContent + '。接続・同期・バックアップ');
+      button.title = 'OneDrive · ' + status.textContent + (current.username ? '\n' + current.username : '') + '\n接続・同期・バックアップ';
+      // Details stay available during background sync; mutating actions remain single-flight.
+      button.disabled = current.disabled === true;
       dialog.querySelector('.zoc-dialog-status').textContent = 'OneDrive · ' + labels[state];
       dialog.querySelector('.zoc-dialog-account').textContent = current.username || 'Microsoftアカウントは未接続です。';
       dialog.querySelector('.zoc-dialog-detail').textContent = current.detail || '';
+      const syncText = dialog.querySelector('.zoc-dialog-sync');
+      syncText.textContent = [syncing.title, syncing.detail].filter(Boolean).join(' · '); syncText.hidden = Boolean(extra) || !syncText.textContent;
+      const connectButton = dialog.querySelector('.zoc-connect');
+      connectButton.textContent = state === 'checking' ? '確認中…' : state === 'connecting' ? '接続中…' : actionLabel;
+      const canSync = Boolean(sync && (state === 'connected' || (state === 'error' && current.syncAvailable)));
+      connectButton.hidden = state === 'connected' || canSync;
+      syncButton.hidden = !canSync;
+      syncButton.textContent = syncState === 'busy' ? '同期中…' : syncing.action || '今すぐ同期';
       dialog.querySelector('.zoc-switch').hidden = !switchAccount || !current.account;
       dialog.querySelector('.zoc-signout').hidden = !signOut || !current.account;
       dialog.querySelector('.zoc-more').hidden = !settings;
       for (const control of dialog.querySelectorAll('.zoc-dialog-actions button')) control.disabled = busy || current.disabled === true;
+      syncButton.disabled ||= current.syncDisabled === true;
+      dialog.querySelector('.zoc-more').disabled = current.disabled === true;
     }
-    async function run(action) {
+    async function run(action, kind = 'connect') {
       if (actionFlight || !action) return;
       const previous = current;
-      actionFlight = Promise.resolve().then(action); update(current);
+      actionKind = kind; actionFlight = Promise.resolve().then(action); update(current);
       try { await actionFlight; }
-      catch (error) { update({ ...previous, state: errorKind(error), detail: errorKind(error) === 'auth' ? '「再接続」を押してください。' : '接続できませんでした。通信状態やMicrosoftのアクセス許可を確認してください。' }); }
-      finally { actionFlight = null; update(current); }
+      catch (error) {
+        const failure = errorKind(error);
+        if (kind === 'sync' && failure === 'error') update({ ...current, sync: { state: 'error', title: '同期未完了', detail: '通信状態を確認して同期を再試行してください。' } });
+        else update({ ...previous, state: failure, detail: failure === 'auth' ? '「再接続」を押してください。' : '通信状態やMicrosoftのアクセス許可を確認してください。' });
+      }
+      finally { actionFlight = null; actionKind = ''; update(current); }
     }
-    button.onclick = () => current.state === 'connected' ? dialog.showModal() : run(current.state === 'error' ? retry : connect);
+    button.onclick = () => dialog.showModal();
     dialog.querySelector('.zoc-close').onclick = () => dialog.close();
+    dialog.querySelector('.zoc-connect').onclick = () => { dialog.close(); return run(current.state === 'error' ? retry : connect); };
+    syncButton.onclick = () => run(sync, 'sync');
     dialog.querySelector('.zoc-switch').onclick = () => { dialog.close(); return run(switchAccount); };
     dialog.querySelector('.zoc-signout').onclick = () => { dialog.close(); return run(signOut); };
     dialog.querySelector('.zoc-more').onclick = () => { dialog.close(); settings(); };
