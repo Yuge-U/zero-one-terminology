@@ -2,6 +2,7 @@
 window.Learning = (() => {
   'use strict';
   let store, drive, error = '', syncing = false, ready = false, dirty = false, timer, syncPromise;
+  let connectionUi;
   const uuid = () => crypto.randomUUID();
   function notify() { window.dispatchEvent(new CustomEvent('learningchange')); renderPanel(); }
   function fail(e) { error = e.message || '保存できませんでした。'; notify(); }
@@ -61,16 +62,15 @@ window.Learning = (() => {
   function renderPanel() {
     const status = document.getElementById('learningStatus');
     if (!status) return;
-    status.textContent = error || (!ready ? '保存機能を準備中…' : syncing ? 'OneDriveと同期中…' : drive?.account ? (dirty ? '端末に保存済み・同期待ち' : 'OneDriveに接続中') : 'このブラウザに保存中');
+    status.textContent = error || (drive?.connectionStatus().state === 'auth' ? '再接続が必要です。上部の「再接続」を押してください。' : !ready ? '保存機能を準備中…' : syncing ? 'OneDriveと同期中…' : drive?.account ? (dirty ? '端末に保存済み・同期待ち' : 'OneDriveに接続中') : 'このブラウザに保存中');
     status.classList.toggle('learning-error', !!error);
     const inline = document.getElementById('learningInlineStatus');
     if (inline) { inline.textContent = status.textContent; inline.classList.toggle('learning-error', !!error); }
     document.getElementById('learningAccount').textContent = drive?.account ? drive.account.username : 'Microsoftアカウントに接続すると、他の端末と学習データを共有できます。';
-    document.getElementById('learningConnect').disabled = !ready || syncing || !drive?.client;
-    document.getElementById('learningConnect').textContent = drive?.account ? '再接続・アカウント変更' : 'Microsoftアカウントで接続';
-    document.getElementById('learningDisconnect').hidden = !drive?.account;
+    const connection = drive?.connectionStatus();
+    if (connectionUi) connectionUi.update({ ...connection, disabled: !ready || syncing });
     document.getElementById('learningSync').disabled = !drive?.account || syncing;
-    for (const id of ['learningBackup', 'learningRestore', 'learningDisconnect']) document.getElementById(id).disabled = !ready || syncing;
+    for (const id of ['learningBackup', 'learningRestore']) document.getElementById(id).disabled = !ready || syncing;
     try {
       if (!store) return;
       const quizzes = store.quizzes(), summary = LearningModel.summarize(quizzes), state = store.state();
@@ -99,16 +99,17 @@ window.Learning = (() => {
       }));
     } catch (e) { status.textContent = e.message; }
   }
-  async function connect() {
+  async function connect(chooseAccount = false) {
+    if (!chooseAccount && drive?.connectionStatus().state === 'connected') { connectionUi.open(); return; }
     try {
       if (typeof Q !== 'undefined' && !quizRecord(Q)) return;
       closeQuiz();
       localStorage.setItem('zot_import_guest_after_login', '1');
-      await drive.signIn();
+      await drive.signIn({ chooseAccount });
     } catch (e) { fail(e); }
   }
   async function disconnect() {
-    try { if (typeof Q !== 'undefined' && !quizRecord(Q)) return; closeQuiz(); await sync(); if (error) return; await drive.signOut(); } catch (e) { fail(e); }
+    try { if (typeof Q !== 'undefined' && !quizRecord(Q)) return; closeQuiz(); if (drive.connectionStatus().state === 'connected') { await sync(); if (error) return; } await drive.signOut(); } catch (e) { fail(e); }
   }
   function importGuest() {
     if (!confirm('このブラウザの未接続時の学習データを、表示中のMicrosoftアカウントへ取り込みますか？')) return;
@@ -134,6 +135,10 @@ window.Learning = (() => {
     try {
       store = new LearningStore(localStorage); store.migrateLegacy();
       drive = new TerminologyOneDrive();
+      connectionUi = ZeroOneConnection.create({ mount: '#zeroOneConnection', connect,
+        retry: async () => { await drive.checkConnection(); if (drive.account) await sync(); else await connect(); },
+        switchAccount: () => connect(true), signOut: disconnect, settings: open });
+      drive.onStatusChange(status => connectionUi.update({ ...status, disabled: !ready || syncing }));
       const account = await drive.init();
       if (account) {
         if (!account.homeAccountId) { drive.account = null; throw new Error('アカウントを識別できません。再接続してください。'); }

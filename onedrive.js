@@ -3,6 +3,7 @@
   const DEFAULT_CLIENT_ID = 'b75b499d-2b47-42ed-9e10-41cd76dbc6c5';
   const SCOPES = ['Files.ReadWrite.AppFolder'];
   const GRAPH = 'https://graph.microsoft.com/v1.0';
+  const Connection = typeof module !== 'undefined' && module.exports ? require('./zero-one-connection.js') : root.ZeroOneConnection;
   const Model = typeof module !== 'undefined' && module.exports ? require('./learning-model.js') : root.LearningModel;
   class GraphError extends Error {
     constructor(status, message) { super(message); this.status = status; }
@@ -15,33 +16,29 @@
       this.redirectUri = new URL('./', location.href).href;
       const override = storage.getItem('basketball-tactics-onedrive-client-id');
       this.clientId = /^[0-9a-f-]{36}$/i.test(override || '') ? override : DEFAULT_CLIENT_ID;
-      this.account = null;
+      this.auth = new Connection.Auth({ msal, storage, clientId: this.clientId, redirectUri: this.redirectUri, accountKey: 'zero-one-terminology-account' });
       this.updateCache = new Map();
     }
-    async init() {
-      if (!this.msal?.PublicClientApplication) throw new Error('Microsoft接続機能を読み込めませんでした。ページを再読込してください。');
-      this.client = new this.msal.PublicClientApplication({
-        auth: { clientId: this.clientId, authority: 'https://login.microsoftonline.com/consumers', redirectUri: this.redirectUri, postLogoutRedirectUri: this.redirectUri },
-        cache: { cacheLocation: 'localStorage' }, system: { allowPlatformBroker: false }
-      });
-      await this.client.initialize();
-      const response = await this.client.handleRedirectPromise();
-      const accounts = this.client.getAllAccounts();
-      this.account = response?.account || this.client.getActiveAccount() || (accounts.length === 1 ? accounts[0] : null);
-      if (this.account) this.client.setActiveAccount(this.account);
-      return this.account;
-    }
-    async signIn() {
-      await this.client.loginRedirect({ scopes: SCOPES, redirectUri: this.redirectUri, prompt: 'select_account' });
-    }
-    async signOut() { await this.client.logoutRedirect({ account: this.account, postLogoutRedirectUri: this.redirectUri }); }
+    get account() { return this.auth.account; }
+    set account(value) { this.auth.account = value; }
+    get client() { return this.auth.client; }
+    async init() { return this.auth.init(); }
+    async signIn(options = {}) { return this.auth.signIn(options); }
+    async signOut() { return this.auth.signOut(); }
+    connectionStatus() { return this.auth.status(); }
+    onStatusChange(listener) { return this.auth.subscribe(listener); }
+    async checkConnection() { return this.auth.check(); }
     async request(path, options = {}, type = 'json') {
       if (!this.account) throw new Error('Microsoftアカウントへ接続してください。');
       const url = path.startsWith('https:') ? path : GRAPH + path;
       if (new URL(url).origin !== 'https://graph.microsoft.com') throw new Error('不正なGraph接続先です。');
-      const token = await this.client.acquireTokenSilent({ account: this.account, scopes: SCOPES });
+      let token = await this.auth.token(), renewed = false;
       for (let attempt = 0; ; attempt++) {
-        const response = await this.fetcher(url, { ...options, headers: { ...options.headers, Authorization: 'Bearer ' + token.accessToken } });
+        const response = await this.fetcher(url, { ...options, headers: { ...options.headers, Authorization: 'Bearer ' + token } });
+        if (response.status === 401) {
+          if (renewed) throw this.auth.requireInteraction();
+          renewed = true; token = await this.auth.token({ forceRefresh: true }); continue;
+        }
         if ((response.status === 429 || response.status === 503) && attempt < 2) {
           const delay = Math.min(30, Number(response.headers.get('Retry-After')) || (attempt + 1) * 2);
           await new Promise(resolve => setTimeout(resolve, delay * 1000));
