@@ -127,13 +127,13 @@ test('browser: legacy data, favorites, quiz history, reload and account-isolated
       await page.locator('.qnext').click();
     }
     await page.getByRole('button', { name: '辞書へ戻る', exact: true }).click();
-    await page.getByRole('button', { name: 'MY LEARNING · 同期' }).click();
+    await page.getByRole('button', { name: 'MY LEARNING' }).click();
     assert.match(await page.locator('#learningStats').textContent(), /クイズ 1回/);
     assert.equal(await page.locator('#learningHistory p').count(), 1);
     fs.mkdirSync(path.join(root, '..', 'outputs'), { recursive: true });
     await page.screenshot({ path: path.join(root, '..', 'outputs', 'terminology-learning-mobile.png') });
     await page.reload(); await page.waitForFunction(() => Learning.ready && DATA.length > 0);
-    await page.getByRole('button', { name: 'MY LEARNING · 同期' }).click();
+    await page.getByRole('button', { name: 'MY LEARNING' }).click();
     assert.match(await page.locator('#learningStats').textContent(), /クイズ 1回/);
     const a = await context('account-a', true), b = await context('account-a'), c = await context('account-b');
     await a.page.evaluate(() => Learning.sync()); await b.page.evaluate(() => Learning.sync());
@@ -155,7 +155,7 @@ test('browser: legacy data, favorites, quiz history, reload and account-isolated
     await realPage.getByRole('button',{name:'確認しました',exact:true}).click();
     await realPage.reload(); await realPage.waitForFunction(() => Learning.ready && DATA.length > 0);
     assert.equal(await realPage.locator('#welcomeDialog').isVisible(),false);
-    await realPage.getByRole('button', { name: 'MY LEARNING · 同期' }).click();
+    await realPage.getByRole('button', { name: 'MY LEARNING' }).click();
     assert.equal(await realPage.locator('#learningConnect').count(), 0);
     assert.equal(await realPage.locator('#learningDisconnect').count(), 0);
     await realPage.locator('#learningDialog button').filter({hasText:'閉じる'}).click();

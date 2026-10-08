@@ -13,3 +13,12 @@
 .zero-one-connection.zoc-compact[data-state=connected] .zoc-primary{color:#087349;border-color:#9acbb6;background:#effaf4}.zoc-compact[data-state=connected] .zoc-indicator{background:#087349;border-color:#effaf4}
 .zero-one-connection.zoc-compact[data-state=auth] .zoc-primary,.zero-one-connection.zoc-compact[data-state=permission] .zoc-primary{color:#a65b00;border-color:#e5c69b;background:#fff7eb}.zoc-compact[data-state=auth] .zoc-indicator,.zoc-compact[data-state=permission] .zoc-indicator{background:#a65b00;border-color:#fff7eb}
 .zero-one-connection.zoc-compact[data-state=error] .zoc-primary{color:#a83232;border-color:#dfb0b0;background:#fff2f2}.zoc-compact[data-state=error] .zoc-indicator{background:#a83232;border-color:#fff2f2}
+
+/* The cloud is also the only sync entry. */
+.zero-one-connection.zoc-compact[data-sync=busy] .zoc-primary{color:#176bb1;border-color:#a9cdea;background:#edf6ff}
+.zoc-compact[data-sync=busy] .zoc-indicator{background:#176bb1;border-color:#edf6ff}
+.zero-one-connection.zoc-compact[data-sync=pending] .zoc-primary,.zero-one-connection.zoc-compact[data-sync=offline] .zoc-primary,.zero-one-connection.zoc-compact[data-sync=conflict] .zoc-primary{color:#a65b00;border-color:#e5c69b;background:#fff7eb}
+.zoc-compact[data-sync=pending] .zoc-indicator,.zoc-compact[data-sync=offline] .zoc-indicator,.zoc-compact[data-sync=conflict] .zoc-indicator{background:#a65b00;border-color:#fff7eb}
+.zero-one-connection.zoc-compact[data-sync=error] .zoc-primary{color:#a83232;border-color:#dfb0b0;background:#fff2f2}
+.zoc-compact[data-sync=error] .zoc-indicator{background:#a83232;border-color:#fff2f2}
+.zoc-dialog{max-height:calc(100dvh - 32px);overflow:auto}.zoc-dialog .zoc-dialog-sync{padding:12px;border-radius:9px;background:#f3f7fb}.zoc-dialog .zoc-extra:empty{display:none}

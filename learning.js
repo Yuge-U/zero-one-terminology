@@ -2,20 +2,25 @@
 window.Learning = (() => {
   'use strict';
   let store, drive, error = '', syncing = false, ready = false, dirty = false, timer, syncPromise;
-  let connectionUi;
+  let connectionUi, lastSynced = '', syncError = '';
+  function updateConnection(status = drive?.connectionStatus()) {
+    if (!connectionUi) return;
+    const syncState = syncing ? 'busy' : !navigator.onLine ? 'offline' : syncError ? 'error' : dirty ? 'pending' : lastSynced ? 'synced' : 'idle';
+    connectionUi.update({ ...status, disabled: !ready, busy: syncing, sync: { state: syncState, title: syncing ? 'OneDriveと同期中…' : syncError || (dirty ? '端末に保存済み・同期待ち' : lastSynced ? '最終同期 ' + lastSynced : '学習記録はこの端末に保存されています。') }, syncDisabled: !navigator.onLine });
+  }
   const uuid = () => crypto.randomUUID();
   function notify() { window.dispatchEvent(new CustomEvent('learningchange')); renderPanel(); }
   function fail(e) { error = e.message || '保存できませんでした。'; notify(); }
   function change(action) { try { action(); error = ''; notify(); schedule(); return true; } catch (e) { fail(e); return false; } }
-  function schedule() { dirty = true; clearTimeout(timer); if (drive?.account && ready) timer = setTimeout(sync, 1500); }
+  function schedule() { dirty = true; updateConnection(); clearTimeout(timer); if (drive?.account && ready) timer = setTimeout(sync, 1500); }
   async function sync() {
     if (syncing) { dirty = true; return syncPromise; }
     if (!drive?.account || !ready) return;
-    syncing = true;
+    syncing = true; syncError = "";
     syncPromise = (async () => {
       try {
-        do { dirty = false; error = ''; notify(); await syncLearning(store, drive); } while (dirty);
-      } catch (e) { error = e.message || '同期できませんでした。再接続してください。'; }
+        do { dirty = false; error = ''; notify(); await syncLearning(store, drive); lastSynced = new Date().toLocaleTimeString('ja-JP'); } while (dirty);
+      } catch (e) { error = syncError = e.message || '同期できませんでした。再接続してください。'; }
       finally { syncing = false; notify(); }
     })();
     return syncPromise;
@@ -68,8 +73,7 @@ window.Learning = (() => {
     if (inline) { inline.textContent = status.textContent; inline.classList.toggle('learning-error', !!error); }
     document.getElementById('learningAccount').textContent = drive?.account ? drive.account.username : 'Microsoftアカウントに接続すると、他の端末と学習データを共有できます。';
     const connection = drive?.connectionStatus();
-    if (connectionUi) connectionUi.update({ ...connection, disabled: !ready || syncing });
-    document.getElementById('learningSync').disabled = !drive?.account || syncing;
+    updateConnection(connection);
     for (const id of ['learningBackup', 'learningRestore']) document.getElementById(id).disabled = !ready || syncing;
     try {
       if (!store) return;
@@ -137,8 +141,8 @@ window.Learning = (() => {
       drive = new TerminologyOneDrive();
       connectionUi = ZeroOneConnection.create({ mount: '#zeroOneConnection', connect,
         retry: async () => { await drive.checkConnection(); if (drive.account) await sync(); else await connect(); },
-        switchAccount: () => connect(true), signOut: disconnect, settings: open });
-      drive.onStatusChange(status => connectionUi.update({ ...status, disabled: !ready || syncing }));
+        switchAccount: () => connect(true), signOut: disconnect, settings: open, settingsLabel: '学習記録・バックアップ', sync });
+      drive.onStatusChange(updateConnection);
       const account = await drive.init();
       if (account) {
         if (!account.homeAccountId) { drive.account = null; throw new Error('アカウントを識別できません。再接続してください。'); }
@@ -154,6 +158,7 @@ window.Learning = (() => {
     ready = !!store; notify();
     if (drive?.account && !error) await sync();
   }
+  window.addEventListener('offline', () => updateConnection());
   window.addEventListener('online', () => { if (drive?.account) sync(); });
   window.addEventListener('pagehide', () => { try { if (typeof Q !== 'undefined') quizRecord(Q); } catch (e) { error = e.message; } });
   window.addEventListener('storage', event => {
