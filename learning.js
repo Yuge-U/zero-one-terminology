@@ -3,6 +3,8 @@ window.Learning = (() => {
   'use strict';
   let store, drive, error = '', syncing = false, ready = false, dirty = false, timer, syncPromise;
   let connectionUi, lastSynced = '', syncError = '';
+  let updateBusy=0;
+  window.ZeroOneUpdateGuard=()=>({ready,busy:syncing||updateBusy>0,dirty:typeof Q!=='undefined'&&!!Q&&!Q.saved,message:'クイズを終了して学習記録を保存してから更新してください。'});
   function updateConnection(status = drive?.connectionStatus()) {
     if (!connectionUi) return;
     const syncState = syncing ? 'busy' : !navigator.onLine ? 'offline' : syncError ? 'error' : dirty ? 'pending' : lastSynced ? 'synced' : 'idle';
@@ -103,7 +105,7 @@ window.Learning = (() => {
       }));
     } catch (e) { status.textContent = e.message; }
   }
-  async function connect(chooseAccount = false) {
+  async function connectForUpdateGuard(chooseAccount = false) {
     if (!chooseAccount && drive?.connectionStatus().state === 'connected') { connectionUi.open(); return; }
     try {
       if (typeof Q !== 'undefined' && !quizRecord(Q)) return;
@@ -112,7 +114,7 @@ window.Learning = (() => {
       await drive.signIn({ chooseAccount });
     } catch (e) { fail(e); }
   }
-  async function disconnect() {
+  async function disconnectForUpdateGuard() {
     try { if (typeof Q !== 'undefined' && !quizRecord(Q)) return; closeQuiz(); if (drive.connectionStatus().state === 'connected') { await sync(); if (error) return; } await drive.signOut(); } catch (e) { fail(e); }
   }
   function importGuest() {
@@ -125,7 +127,7 @@ window.Learning = (() => {
       const link = document.createElement('a'); link.href = url; link.download = 'zero-one-terminology-backup.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) { fail(e); }
   }
-  async function restore(event) {
+  async function restoreForUpdateGuard(event) {
     const file = event.target.files[0]; if (!file) return;
     try {
       if (file.size > 20 * 1024 * 1024) throw new Error('バックアップファイルが大きすぎます。');
@@ -135,6 +137,9 @@ window.Learning = (() => {
       if (confirm('バックアップを現在の学習データへ統合しますか？接続中の場合はOneDriveにも同期します。')) change(() => store.importData(data.state, data.quizzes));
     } catch (e) { fail(e); } finally { event.target.value = ''; }
   }
+  async function restore(...args){updateBusy++;try{return await restoreForUpdateGuard(...args);}finally{updateBusy--;}}
+  async function connect(...args){updateBusy++;try{return await connectForUpdateGuard(...args);}finally{updateBusy--;}}
+  async function disconnect(...args){updateBusy++;try{return await disconnectForUpdateGuard(...args);}finally{updateBusy--;}}
   async function init() {
     try {
       store = new LearningStore(localStorage); store.migrateLegacy();

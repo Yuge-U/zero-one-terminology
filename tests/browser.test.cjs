@@ -16,13 +16,13 @@ test('browser: legacy data, favorites, quiz history, reload and account-isolated
     } catch { res.statusCode = 404; res.end(); }
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const browser = await chromium.launch({ channel: 'msedge', headless: true });
+  const browser = await chromium.launch({ headless: true }).catch(error=>{server.close();throw error;});
   const url = `http://127.0.0.1:${server.address().port}/`;
   const errors = [], cloud = new Map();
   async function context(account, guest = false) {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
     await ctx.addInitScript(({ account, guest }) => { if (account) localStorage.testAccount = account; if (guest && !localStorage.getItem('seeded')) { localStorage.zot_favs = '["GBT-0001"]'; localStorage.seeded = '1'; } }, { account, guest });
-    await ctx.route('**/vendor/msal-browser.min.js', route => route.fulfill({ contentType: 'text/javascript', body: msal }));
+    await ctx.route('**/vendor/msal-browser.min.js*', route => route.fulfill({ contentType: 'text/javascript', body: msal }));
     await ctx.route('https://graph.microsoft.com/**', async route => {
       const request = route.request(), p = new URL(request.url()).pathname, method = request.method();
       const db = cloud.get(account) || { state: null, version: 0, history: new Map(), updates: new Map() }; cloud.set(account, db);

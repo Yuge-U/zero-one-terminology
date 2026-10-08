@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "app": "TERMINOLOGY",
+  "buildId": "0360b5d4ca29d19d71cb80198dc67d13bab040eada7c1d5ab0f610a6c8b9bdc8",
+  "files": [
+    {
+      "path": "apple-touch-zero-one-180-20261007m.png",
+      "sha256": "2a67fb30e4d25670d28f9517dad80525f1bd44f1081147e3586e5b58725b2f1e"
+    },
+    {
+      "path": "audio-manifest.js",
+      "sha256": "1dbf4d93a63ee6bfbb7b722229b7491a3e5176992237d26732b4045136769220"
+    },
+    {
+      "path": "brand-entry.js",
+      "sha256": "cbc89fee2fc235866502ea4b213f276873d405f40a081d71eebff83f8b7c9e33"
+    },
+    {
+      "path": "diagrams.css",
+      "sha256": "946e258d0aceeca5dcb9fb2b5ed8798464757973420c6afca0d145305905ced7"
+    },
+    {
+      "path": "diagrams.js",
+      "sha256": "dc17469256803ec9fd34b696442f9f3f6910e48a401484f78ee8f4c2a8c23764"
+    },
+    {
+      "path": "english.json",
+      "sha256": "a1b87932d4f9528092b0620776ddb0ebee61f8c3a074dad5e882b63bf235d1bf"
+    },
+    {
+      "path": "favicon-terminology-20261007f.ico",
+      "sha256": "f147f56acb6b41ad661491abc2d5cc9c3860d768d4401e4c7573d83d2ceb5091"
+    },
+    {
+      "path": "icon-192-v2.png",
+      "sha256": "dd7966c0813204a61b42dd78e223e5afa4cf6eb036b5482b4ebdbf2d67185498"
+    },
+    {
+      "path": "icon-512-v2.png",
+      "sha256": "b5a7d231945a9c70d8e26473858b1f54b228488a0c064ce11213a20f321efd9c"
+    },
+    {
+      "path": "index.html",
+      "sha256": "f6b016ea591b39da86445a6b1dfc1a2562f780e4def9820b45c809ab2c596806"
+    },
+    {
+      "path": "learning-model.js",
+      "sha256": "9a3c587edba48f2366cc9500dc1b608e15da4a7fcd71e3e377fedf51118d6d4e"
+    },
+    {
+      "path": "learning-store.js",
+      "sha256": "4368cbca29c6297de698c45946ed1b8635789bae5822f8e6c0bf257ee07265d9"
+    },
+    {
+      "path": "learning.css",
+      "sha256": "20f5fc03c1dcf452b150808c83c67c29d15f6e92521e72a82be16bd8607af0dc"
+    },
+    {
+      "path": "learning.js",
+      "sha256": "3ad8cadc473fb2d7ffc3abb3f3d8357e83f109eb4d5f326251efb1a4d1009678"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "sha256": "ecea5354c4056281fddbf27df2616ffcff0e8dd60ced34dff28dc6509e741c68"
+    },
+    {
+      "path": "motion-examples.js",
+      "sha256": "18225ed1be57eb3ac1205838cace0f980eddca13189d0e8e5a021dd9c7d9b02a"
+    },
+    {
+      "path": "navigation.css",
+      "sha256": "6e2985466aeb4deea7b8e763f3aaba7077a3eb4e556e2605ccaa66f0ba420ba5"
+    },
+    {
+      "path": "onedrive.js",
+      "sha256": "06dce90f66af46d2cb8f4ac7f1381cb7bcbb31b1ec9efea4b8e9407b4b066c3f"
+    },
+    {
+      "path": "quiz.js",
+      "sha256": "2dbf57e7d3e96ae7c2b176d93f9f9f841211f30ec4b8f3ee56d31d003abfff0b"
+    },
+    {
+      "path": "safari-terminology-192-20261007g.png",
+      "sha256": "dd7966c0813204a61b42dd78e223e5afa4cf6eb036b5482b4ebdbf2d67185498"
+    },
+    {
+      "path": "speech.js",
+      "sha256": "ebf9c05e9307eb092c18feff5af7794dad44b2884696b15517fc7b508f293a7b"
+    },
+    {
+      "path": "term-navigation.js",
+      "sha256": "bc81c6cd0eee6ed24f5bd071238ce7011c0c17535e0ef5739b6deffd8de3c21c"
+    },
+    {
+      "path": "terms.json",
+      "sha256": "64c684f6e7b9783cd70df918269efb09cb904345252c3245236363e1ed643504"
+    },
+    {
+      "path": "vendor/msal-browser.min.js",
+      "sha256": "074de35a99c1e7fa51d6e235cdaf688d4a24af91f43aef9c54532afcbba62ef2"
+    },
+    {
+      "path": "welcome.js",
+      "sha256": "e907a75b0f1672964ce320546e6b763f41cc77ee9ee8073650a60e887d475f86"
+    },
+    {
+      "path": "zero-one-connection.css",
+      "sha256": "5ca96de52e054fa5ac95c67fa9bd5629cfa592a2b6d489fe6b1aaa1d94066c66"
+    },
+    {
+      "path": "zero-one-connection.js",
+      "sha256": "75fd15f47ddd54abbceb21ae95ccff7dc139c8245d761d3d1f7be83f8594957c"
+    },
+    {
+      "path": "zero-one-update.css",
+      "sha256": "56caba661c2b1da58ab01628bdcc307179730e320422f5763c340ec463bc663e"
+    },
+    {
+      "path": "zero-one-update.js",
+      "sha256": "cc8dd9092d096d31d25eb0ee9ac6858bc2625c6d1b9574f0d65c332f9dc8db2e"
+    }
+  ]
+}
