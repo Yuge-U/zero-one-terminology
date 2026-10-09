@@ -10,7 +10,7 @@
   }
   async function verifyAsset(response,expected){if(!response.ok||response.type==='opaque')throw Error('更新ファイルを取得できません。');const bytes=await response.clone().arrayBuffer();const digest=await crypto.subtle.digest('SHA-256',bytes);const actual=Array.from(new Uint8Array(digest),n=>n.toString(16).padStart(2,'0')).join('');if(actual!==expected)throw Error('配信の完了を確認できません。少し待って再試行してください。');return response;}
   function rpc(worker,message,timeout=4000){return new Promise((resolve,reject)=>{const channel=new MessageChannel(),timer=setTimeout(()=>{channel.port1.close();reject(Error('更新の準備が完了しませんでした。再試行してください。'));},timeout);channel.port1.onmessage=e=>{clearTimeout(timer);channel.port1.close();resolve(e.data);};worker.postMessage(message,[channel.port2]);});}
-  function start({app,buildId,swPath='',versionMount='',guard=()=>root.ZeroOneUpdateGuard?.(),base=new URL('./',location.href)}){
+  function start({app,buildId,swPath='',versionMount='',version='',guard=()=>root.ZeroOneUpdateGuard?.(),base=new URL('./',location.href)}){
     if(!validId(buildId))return null;
     let latest=null,checking=null,applying=false,lastCheck=0,registration=null,panel,message,button;
     base=new URL(base);
@@ -32,11 +32,11 @@
         const destination=new URL(location.href);destination.searchParams.set('zeroOneBuild',release.buildId);location.replace(destination.href);
       }catch(error){locked.forEach(el=>el.inert=false);applying=false;draw(error.message||'更新できませんでした。現在のアプリを引き続き利用できます。');}
     }
-    if(versionMount){const mount=document.querySelector(versionMount);if(mount){const p=document.createElement('p');p.className='zou-version';p.textContent='アプリ版：'+buildId.slice(0,12);mount.append(p);}}
+    if(versionMount){const mount=document.querySelector(versionMount);if(mount){const p=document.createElement('p');p.className='zou-version';p.textContent='アプリ版：'+(version?'v'+version+'（'+buildId.slice(0,12)+'）':buildId.slice(0,12));mount.append(p);}}
     publishClient();navigator.serviceWorker?.addEventListener('controllerchange',publishClient); // Never auto-reload a retained editor.
     if(swPath&&'serviceWorker'in navigator)navigator.serviceWorker.register(new URL(swPath,base),{scope:base.href,updateViaCache:'none'}).then(r=>{registration=r;publishClient();}).catch(()=>{});
     const foreground=()=>{if(!document.hidden){publishClient();check();}};window.addEventListener('pageshow',foreground);window.addEventListener('focus',foreground);document.addEventListener('visibilitychange',foreground);window.addEventListener('online',()=>{if(panel)draw();foreground();});window.addEventListener('offline',()=>{if(panel)draw();});setInterval(foreground,300000);check();
     return {check,apply,get current(){return buildId;},get available(){return latest?.buildId||null;}};
   }
-  const api={start,validateRelease,verifyAsset,authReturn,validId};if(typeof module!=='undefined'&&module.exports)module.exports=api;else{root.ZeroOneUpdate=api;const boot=()=>{const meta=document.querySelector('meta[name="zero-one-build"]');if(meta)root.zeroOneUpdater=start({app:meta.dataset.app,buildId:meta.content,swPath:meta.dataset.worker||'',versionMount:meta.dataset.versionMount||''});};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();}
+  const api={start,validateRelease,verifyAsset,authReturn,validId};if(typeof module!=='undefined'&&module.exports)module.exports=api;else{root.ZeroOneUpdate=api;const boot=()=>{const meta=document.querySelector('meta[name="zero-one-build"]');if(meta)root.zeroOneUpdater=start({app:meta.dataset.app,buildId:meta.content,swPath:meta.dataset.worker||'',versionMount:meta.dataset.versionMount||'',version:meta.dataset.version||''});};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();}
 })(globalThis);

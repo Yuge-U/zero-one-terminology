@@ -15,6 +15,8 @@ CANVASとPRACTICEは既存のService Workerの登録先を維持し、新規イ�
 - 各アプリの更新ガード: PRACTICEの練習・振り返り・タイマー・添付処理、CANVASの自動保存・操作・保存処理、ROSTERの編集フォーム・移行・同期、TERMINOLOGYの未完了クイズ・復元・同期を保護。
 - PRACTICEでは同じファイルを `production/safe-update/` と `production/safe-app-update.mjs` から生成します。生成したworkerはコミット済みテンプレートと照合し、配信情報は全実ファイルのSHAと照合します。既存コアの固定SHA検査は維持します。
 
+TERMINOLOGYのアプリ版番号は `update-release.config.json` の `version`（初版 `1.0.0`）で管理します。版生成時にヘッダー表示・MY LEARNING内の表示・`app-version.json` を同じ番号にそろえます。版番号だけの変更も別の配信版IDになるため、更新通知を正しく検出できます。
+
 ## 更新・公開手順
 
 ROSTER／TERMINOLOGY／CANVASは、変更後に `node scripts/build-update-release.mjs` を実行し、生成されたHTML・app-version.json・Service Worker（ある場合）を変更と一緒にコミットしてください。`node scripts/build-update-release.mjs --check` が古い版情報や未生成の変更を拒否します。既存のPages公開先は維持します。

@@ -1,6 +1,9 @@
 # zero-one-terminology
 Global Basketball Terminology Dictionary
 
+アプリのバージョン：**v1.0.0**。ヘッダーとMY LEARNING画面で確認できます。
+版番号は `update-release.config.json` の `version` で管理し、変更後は `node scripts/build-update-release.mjs` で表示と配信情報を更新してください。
+
 MY LEARNING records favorites, viewed terms, quiz history and incorrect terms locally.
 Optional Microsoft sign-in syncs them to the same OneDrive app folder as CANVAS.
 
