@@ -29,7 +29,7 @@ test('retained clients can still load their own previous immutable assets',async
 test('version generation preserves inline JavaScript, URLs and repeatable build identity',()=>{
  const {mkdtempSync,writeFileSync,rmSync}=require('node:fs'),{tmpdir}=require('node:os'),{execFileSync}=require('node:child_process');
  const directory=mkdtempSync(join(tmpdir(),'update-build-')),builder=process.env.UPDATE_BUILDER||join(root,'scripts/build-update-release.mjs');
- try{const inline="const value=null;window.protected=(value??'saved')==='saved'?'safe':'unsafe';window.markup='<link rel=\"stylesheet\" href=\"runtime.css\">';";
+ try{const inline="const value=null;window.protected=(value??'saved')==='saved'?'safe':'unsafe';window.markup='<link rel=\"stylesheet\" href=\"runtime.css\">';window.versionMarkup='<span data-app-version>runtime</span>';";
  const html='<html><head><meta charset="utf-8"><link href="app.css?v=1" rel="stylesheet"></head><body><span data-app-version>unset</span><script>'+inline+'</script><script src="app.js?v=1"></script></body></html>';
  for(const [name,body]of Object.entries({'index.html':html,'app.js':'window.ready=true;','app.css':'body{}','zero-one-update.js':'window.update=true;','zero-one-update.css':'aside{}'}))writeFileSync(join(directory,name),body);
  const config=join(directory,'config.json');writeFileSync(config,JSON.stringify({root:directory,app:'TEST',version:'1.0.0',files:['index.html','app.js','app.css','zero-one-update.js','zero-one-update.css']}));

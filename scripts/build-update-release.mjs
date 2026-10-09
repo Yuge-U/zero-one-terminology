@@ -17,7 +17,7 @@ for(const name of [...files].sort()){
     let html=assetUrls(bytes.toString().replace(/<meta name="zero-one-build"[^>]*>\n?/g,''),value=>{const [name,query]=value.split('?');if(query===undefined)return value;const params=query.split('&').filter(part=>!/^build=[a-f0-9]{64}$/.test(part));return name+(params.length?'?'+params.join('&'):'');});
     if(!html.includes('zero-one-update.js'))html=html.replace('</body>','<script defer src="./zero-one-update.js"></script>\n</body>');
     if(!html.includes('zero-one-update.css'))html=html.replace('</head>','<link rel="stylesheet" href="./zero-one-update.css">\n</head>');
-    if(config.version)html=html.replace(/(<span\b[^>]*data-app-version[^>]*>)[^<]*(<\/span>)/g,(_,open,close)=>open+'v'+config.version+close);
+    if(config.version)html=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>|(<span\b[^>]*data-app-version[^>]*>)[^<]*(<\/span>)/g,(tag,open,close)=>open?open+'v'+config.version+close:tag);
     canonical.set(name,Buffer.from(html));
   }else if(name===config.worker){canonical.set(name,Buffer.from(bytes.toString().replace(/const BUILD_ID='[a-f0-9]{64}';/,"const BUILD_ID='__ZERO_ONE_BUILD__';")));}
   else canonical.set(name,bytes);
