@@ -1,0 +1,45 @@
+name: Safe app update verification
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: safe-update-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.16.0'
+      - name: Install test browsers
+        run: |
+          npm install --no-save --ignore-scripts --package-lock=false playwright@1.63.0
+          npx playwright install --with-deps chromium webkit
+      - name: Verify immutable release and existing data tests
+        run: |
+          node scripts/build-update-release.mjs --check
+          node --test tests/*.test.cjs
+      - name: Verify update, retained drafts, offline, auth and native guards
+        run: node tests/safe-update.browser.cjs
+      - name: Verify existing connection controls
+        run: node tests/connection-hub.browser.cjs
+      - name: Preserve evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: safe-update-${{ matrix.os }}
+          path: reports/safe-update/
