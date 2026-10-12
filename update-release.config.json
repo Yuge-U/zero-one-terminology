@@ -1,0 +1,8 @@
+{
+  "app": "TERMINOLOGY",
+  "directories": [
+    "vendor"
+  ],
+  "versionMount": "#learningDialog",
+  "version": "1.0.0"
+}
