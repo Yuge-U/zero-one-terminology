@@ -39,3 +39,11 @@ test('version generation preserves inline JavaScript, URLs and repeatable build 
  writeFileSync(join(directory,'app.js'),'window.ready="new";');assert.throws(()=>execFileSync(process.execPath,[builder,config,'--check'],{stdio:'pipe'}));execFileSync(process.execPath,[builder,config]);assert.notEqual(readFileSync(join(directory,'app-version.json'),'utf8'),before);
  }finally{rmSync(directory,{recursive:true,force:true});}
 });
+
+test('update boot waits for the established entry URL and preserves OAuth callbacks',()=>{
+  const source=readFileSync(join(root,'zero-one-update.js'),'utf8');
+  function boot(href){const meta={content:'a'.repeat(64),dataset:{app:'PRACTICE',entryParam:'brand',entryValue:'20261007k'}};const context={URL,URLSearchParams,location:{href},navigator:{onLine:false},document:{readyState:'complete',hidden:false,querySelector:()=>meta,addEventListener(){}},window:{addEventListener(){}},setInterval(){},console};vm.runInNewContext(source,context);return context;}
+  const pending=boot('https://example.test/practice/');assert.equal(pending.zeroOneUpdater,undefined);assert.equal(pending.location.href,'https://example.test/practice/');
+  const settled=boot('https://example.test/practice/?brand=20261007k');assert.equal(settled.zeroOneUpdater.current,'a'.repeat(64));
+  for(const callback of ['?code=test&state=test','#code=test&state=test']){const context=boot('https://example.test/practice/'+callback);assert.equal(context.location.href,'https://example.test/practice/'+callback);assert.equal(context.zeroOneUpdater.current,'a'.repeat(64));}
+});
