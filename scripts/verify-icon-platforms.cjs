@@ -28,6 +28,7 @@ const profiles = {
   console.log('PASS published Safari helper download');
   // Legacy Pages deployments do not reliably emit workflow_run events. Push checks
   // wait for the expected public declarations before opening browser profiles.
+  const automaticEntries=new Map();
   for(const app of configs){
     const deadline=Date.now()+240000;
     let ready=false;
@@ -39,7 +40,11 @@ const profiles = {
         const entry=await fetch(new URL('brand-entry.js?icon-publication='+nonce,app.url),{cache:'no-store'});
         const entryText=await entry.text();
         const apple=app.assets.find(asset=>asset.kind==='apple');
-        if(response.ok&&entry.ok&&html.includes(apple.remote)&&entryText.includes(app.entryRevision)){ready=true;break;}
+        const manualEntry=entryText.includes('Startup URLs and OAuth returns stay unchanged.');
+        const sourceRoot=process.env.ICON_SOURCE_ROOT || '..';
+        const sourceEntry=path.join(sourceRoot,app.repo,'brand-entry.js');
+        const reviewedEntry=app.name==='PRACTICE'?entryText.includes(app.entryRevision):entryText===fs.readFileSync(sourceEntry,'utf8');
+        if(response.ok&&entry.ok&&html.includes(apple.remote)&&reviewedEntry){automaticEntries.set(app.name,!manualEntry);ready=true;break;}
       }catch{}
       await new Promise(resolve=>setTimeout(resolve,3000));
     }
@@ -56,8 +61,9 @@ const profiles = {
           const page=await context.newPage();
           await page.goto(app.url,{waitUntil:'domcontentloaded'});
           await page.locator('link[rel="apple-touch-icon"]').waitFor({state:'attached'});
-          if(app.entryRevision)
+          if(automaticEntries.get(app.name)&&app.entryRevision)
             await page.waitForURL(url=>url.searchParams.get('brand')===app.entryRevision,{waitUntil:'domcontentloaded'});
+          else assert.equal(page.url(),app.url,app.name+' manual startup URL');
           const metadata=await page.evaluate(async()=>{
             const links=[...document.querySelectorAll('link[rel="icon"],link[rel="apple-touch-icon"]')]
               .map(link=>({kind:link.rel==='icon'?'favicon':'apple',url:link.href,type:link.type,sizes:link.sizes.value}));
@@ -99,10 +105,12 @@ const profiles = {
           await page.reload({waitUntil:'domcontentloaded'});
           const apple=await page.locator('link[rel="apple-touch-icon"]').getAttribute('href');
           assert(apple&&new URL(apple,page.url()).pathname===new URL(app.assets.find(a=>a.kind==='apple').remote,app.url).pathname);
+          if(!automaticEntries.get(app.name))assert.equal(page.url(),app.url,app.name+' retained startup URL');
           await page.screenshot({path:`icon-platform-evidence/${profile.name}-${app.name}.png`});
           if(app.name==='CANVAS'){
             await page.goto(new URL('Basketball_Tactics_Board.html',app.url).href,{waitUntil:'domcontentloaded'});
-            await page.waitForURL(url=>url.searchParams.get('brand')===app.entryRevision,{waitUntil:'domcontentloaded'});
+            if(automaticEntries.get(app.name))await page.waitForURL(url=>url.searchParams.get('brand')===app.entryRevision,{waitUntil:'domcontentloaded'});
+            else assert.equal(page.url(),new URL('Basketball_Tactics_Board.html',app.url).href,'Manual legacy startup URL');
             const legacyApple=await page.locator('link[rel="apple-touch-icon"]').getAttribute('href');
             assert.equal(new URL(legacyApple,page.url()).pathname,new URL(app.assets.find(a=>a.kind==='apple').remote,app.url).pathname,'Legacy CANVAS bookmark image');
           }
