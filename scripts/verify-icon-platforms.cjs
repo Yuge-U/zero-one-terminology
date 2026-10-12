@@ -43,7 +43,7 @@ const profiles = {
         const manualEntry=entryText.includes('Startup URLs and OAuth returns stay unchanged.');
         const sourceRoot=process.env.ICON_SOURCE_ROOT || '..';
         const sourceEntry=path.join(sourceRoot,app.repo,'brand-entry.js');
-        const reviewedEntry=app.name==='PRACTICE'?entryText.includes(app.entryRevision):entryText===fs.readFileSync(sourceEntry,'utf8');
+        const reviewedEntry=app.name==='PRACTICE'?entryText.includes(app.entryRevision):entryText.replace(/\r\n/g,'\n')===fs.readFileSync(sourceEntry,'utf8').replace(/\r\n/g,'\n');
         if(response.ok&&entry.ok&&html.includes(apple.remote)&&reviewedEntry){automaticEntries.set(app.name,!manualEntry);ready=true;break;}
       }catch{}
       await new Promise(resolve=>setTimeout(resolve,3000));
