@@ -2,7 +2,7 @@
   "schema": 1,
   "app": "TERMINOLOGY",
   "version": "1.0.0",
-  "buildId": "c3338d9f4be06915dbd1971354188c99c979c82309a6dfb81903bd22b004e183",
+  "buildId": "59a69cd797be9af78c37556610fbcacb14f5fe2392ecf1ea74c067b72db411f4",
   "files": [
     {
       "path": "apple-touch-zero-one-180-20261007m.png",
@@ -42,7 +42,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "2fb103bac42e90926203e4425adb84597beab7d2b657ffb99f18c57f9c3d29a5"
+      "sha256": "4acd2fba36a962387e3347d602bfd30e32689b77803b140a32253099dc10ebe3"
     },
     {
       "path": "learning-model.js",
@@ -118,7 +118,7 @@
     },
     {
       "path": "zero-one-update.js",
-      "sha256": "0aa82ad20c9157d32f6c9ed7d72025c73b38edbe71aaeda79513dd9680f19260"
+      "sha256": "d26a02ffee852b7cf95f9ec01b604665af808b9ff970ca843613d54ded778ab2"
     }
   ]
 }
