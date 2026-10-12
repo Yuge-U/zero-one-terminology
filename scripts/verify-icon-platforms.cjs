@@ -43,8 +43,14 @@ const profiles = {
         const manualEntry=entryText.includes('Startup URLs and OAuth returns stay unchanged.');
         const sourceRoot=process.env.ICON_SOURCE_ROOT || '..';
         const sourceEntry=path.join(sourceRoot,app.repo,app.name==='PRACTICE'?'production/brand-entry.js':'brand-entry.js');
-        const reviewedEntry=app.name==='PRACTICE'?entryText.includes(app.entryRevision):entryText===fs.readFileSync(sourceEntry,'utf8');
-        let startupMatches=true;\n        if(app.name==='PRACTICE'){\n          const release=JSON.parse(fs.readFileSync(path.join(sourceRoot,app.repo,'production/release.json'),'utf8'));\n          const startup=await fetch(new URL('practice-startup.js?icon-publication='+nonce,app.url),{cache:'no-store'});\n          startupMatches=startup.ok&&sha(Buffer.from(await startup.arrayBuffer()))===release.files['practice-startup.js'];\n        }\n        if(response.ok&&entry.ok&&html.includes(apple.remote)&&reviewedEntry&&startupMatches){automaticEntries.set(app.name,app.name==='PRACTICE'||!manualEntry);ready=true;break;}
+        const reviewedEntry=entryText.replace(/\r\n/g,'\n')===fs.readFileSync(sourceEntry,'utf8').replace(/\r\n/g,'\n');
+        let startupMatches=true;
+        if(app.name==='PRACTICE'){
+          const release=JSON.parse(fs.readFileSync(path.join(sourceRoot,app.repo,'production/release.json'),'utf8'));
+          const startup=await fetch(new URL('practice-startup.js?icon-publication='+nonce,app.url),{cache:'no-store'});
+          startupMatches=startup.ok&&sha(Buffer.from(await startup.arrayBuffer()))===release.files['practice-startup.js'];
+        }
+        if(response.ok&&entry.ok&&html.includes(apple.remote)&&reviewedEntry&&startupMatches){automaticEntries.set(app.name,app.name==='PRACTICE'||!manualEntry);ready=true;break;}
       }catch{}
       await new Promise(resolve=>setTimeout(resolve,3000));
     }

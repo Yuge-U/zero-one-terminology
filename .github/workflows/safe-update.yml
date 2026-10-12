@@ -32,6 +32,7 @@ jobs:
       - name: Verify immutable release and existing data tests
         run: |
           node scripts/build-update-release.mjs --check
+          node --check scripts/verify-icon-platforms.cjs
           node --test tests/*.test.cjs
       - name: Verify update, retained drafts, offline, auth and native guards
         run: node tests/safe-update.browser.cjs
