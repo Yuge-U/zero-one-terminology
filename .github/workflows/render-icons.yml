@@ -82,7 +82,7 @@ jobs:
               const errors = [];
               page.on('pageerror', e => errors.push(e.message));
               await page.goto(base, { waitUntil: 'networkidle' });
-              await page.waitForURL(url => url.searchParams.get('brand') === '20261007k');
+              assert.equal(page.url(),base,'Manual-update startup must preserve the entry URL');
               assert.equal(await page.locator('.zeroone-splash img').getAttribute('src'), 'icon-512-v2.png?v=20261007c');
               await page.waitForFunction(() => document.querySelectorAll('.term').length > 0);
               await page.getByRole('button', { name: '確認しました', exact: true }).click();
@@ -94,6 +94,7 @@ jobs:
               assert.equal(await page.locator('link[rel="icon"]').getAttribute('href'),'safari-terminology-192-20261007g.png');
               assert.deepEqual(await page.evaluate(async()=>{const img=new Image();img.src='favicon-terminology-32-20261007f.png';await img.decode();return [img.naturalWidth,img.naturalHeight];}),[32,32]);
               assert.deepEqual(await page.evaluate(async()=>{const result=[];for(const rel of ['icon','apple-touch-icon']){const img=new Image();img.src=document.querySelector(`link[rel="${rel}"]`).href;await img.decode();result.push([img.naturalWidth,img.naturalHeight]);}return result;}),[[192,192],[180,180]]);
+              assert.equal(page.url(),base,'Startup must not rewrite the entry URL');
               assert.deepEqual(errors, []);
               await page.screenshot({ path: 'production-mobile-'+engine.name()+'.png', fullPage: false });
               await page.setViewportSize({ width: 1440, height: 1000 });
