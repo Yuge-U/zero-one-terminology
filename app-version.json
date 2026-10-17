@@ -2,7 +2,7 @@
   "schema": 1,
   "app": "TERMINOLOGY",
   "version": "1.0.0",
-  "buildId": "c6a0ce239d00314f4007d06303d180ee8ec479da0cce11b8d4a9a2dbdcf60298",
+  "buildId": "e534bc04e9be2c9849762c47b70d903d55e0d10e659c6678b0f60328ea6d33a0",
   "files": [
     {
       "path": "apple-touch-zero-one-180-20261007m.png",
@@ -14,15 +14,15 @@
     },
     {
       "path": "brand-entry.js",
-      "sha256": "66c0f9b806ca28073be1854292f8f360d8ae92b96fc4a4496abb5156016576cd"
+      "sha256": "cbc89fee2fc235866502ea4b213f276873d405f40a081d71eebff83f8b7c9e33"
     },
     {
       "path": "diagrams.css",
-      "sha256": "1eb8f0064f721417f5c2c194b07b7c65720b08a79c203566c4cf6b5132e56206"
+      "sha256": "946e258d0aceeca5dcb9fb2b5ed8798464757973420c6afca0d145305905ced7"
     },
     {
       "path": "diagrams.js",
-      "sha256": "7846b8c7620719dcbddb891039a48f57852c0800dd3b4f33916b693c8f13524b"
+      "sha256": "dc17469256803ec9fd34b696442f9f3f6910e48a401484f78ee8f4c2a8c23764"
     },
     {
       "path": "english.json",
@@ -42,43 +42,43 @@
     },
     {
       "path": "index.html",
-      "sha256": "74f1074eb98b709551a2bde24881f68b6f20a749ea27ffa157ba12dd75a9fa34"
+      "sha256": "60e25a46471e2416dfb837b7e85ac4932975ace1d291dfdd4d3334360c1ddd19"
     },
     {
       "path": "learning-model.js",
-      "sha256": "578cb0271b22df2c008e25780c61001a91c8b7127f408fe51d00596cf130dbbf"
+      "sha256": "9a3c587edba48f2366cc9500dc1b608e15da4a7fcd71e3e377fedf51118d6d4e"
     },
     {
       "path": "learning-store.js",
-      "sha256": "3a0c69d1a9d41f7c6055139b75485b213d5b24cdc80fb6b5aadc516481aa7078"
+      "sha256": "4368cbca29c6297de698c45946ed1b8635789bae5822f8e6c0bf257ee07265d9"
     },
     {
       "path": "learning.css",
-      "sha256": "ef8c862977771c13c6fe267e49603842b2659e9cd2885853103c1d72734deeaa"
+      "sha256": "20f5fc03c1dcf452b150808c83c67c29d15f6e92521e72a82be16bd8607af0dc"
     },
     {
       "path": "learning.js",
-      "sha256": "a45e93e5a4a5254215d095aa21b5e554c38ff490a7b8851b106d46844534844c"
+      "sha256": "3ad8cadc473fb2d7ffc3abb3f3d8357e83f109eb4d5f326251efb1a4d1009678"
     },
     {
       "path": "manifest.webmanifest",
-      "sha256": "872219c2e402196c26c179c3cfeabe412dea0ad1e607720492295e7bdeb00a2d"
+      "sha256": "ecea5354c4056281fddbf27df2616ffcff0e8dd60ced34dff28dc6509e741c68"
     },
     {
       "path": "motion-examples.js",
-      "sha256": "62f6151c3f04d5f4df43d00d15d381351c2508b51c14ccfc80fd4ff44e016dbc"
+      "sha256": "18225ed1be57eb3ac1205838cace0f980eddca13189d0e8e5a021dd9c7d9b02a"
     },
     {
       "path": "navigation.css",
-      "sha256": "8a472581d0bef6f4ab96ca8277a96daeab43700f98e8c743a103468f3952788d"
+      "sha256": "6e2985466aeb4deea7b8e763f3aaba7077a3eb4e556e2605ccaa66f0ba420ba5"
     },
     {
       "path": "onedrive.js",
-      "sha256": "e34104e62e141596967fdc546137e63f010b6290004777250fb8b8ce4dc31c8b"
+      "sha256": "06dce90f66af46d2cb8f4ac7f1381cb7bcbb31b1ec9efea4b8e9407b4b066c3f"
     },
     {
       "path": "quiz.js",
-      "sha256": "e5105b4d17c250787d5db2e11f7137194fcd8074ba948e04b8cf976b0c553732"
+      "sha256": "2dbf57e7d3e96ae7c2b176d93f9f9f841211f30ec4b8f3ee56d31d003abfff0b"
     },
     {
       "path": "safari-terminology-192-20261007g.png",
@@ -86,11 +86,11 @@
     },
     {
       "path": "speech.js",
-      "sha256": "b8275989715f68c08d7733dfb7ac91a50091c2cc8a803128a1df1463ace36551"
+      "sha256": "ebf9c05e9307eb092c18feff5af7794dad44b2884696b15517fc7b508f293a7b"
     },
     {
       "path": "term-navigation.js",
-      "sha256": "df47824284035104b40ce2bce1be095d2b83f56f8db52934e25498f5cd2fba88"
+      "sha256": "bc81c6cd0eee6ed24f5bd071238ce7011c0c17535e0ef5739b6deffd8de3c21c"
     },
     {
       "path": "terms.json",
@@ -98,27 +98,27 @@
     },
     {
       "path": "vendor/msal-browser.min.js",
-      "sha256": "6310476d4e3a01b26a4ed77f2d838420ef39cdbdf73cb4c637b0b4b1da615aed"
+      "sha256": "074de35a99c1e7fa51d6e235cdaf688d4a24af91f43aef9c54532afcbba62ef2"
     },
     {
       "path": "welcome.js",
-      "sha256": "f173e10bca081bfe7816879e0049aa466310b458c7fca28ec6dbbdd22f86f522"
+      "sha256": "e907a75b0f1672964ce320546e6b763f41cc77ee9ee8073650a60e887d475f86"
     },
     {
       "path": "zero-one-connection.css",
-      "sha256": "b403f00769dbfb9e7213aa0eff88e3a4515b508972030f03d41a931f72cd58c6"
+      "sha256": "5ca96de52e054fa5ac95c67fa9bd5629cfa592a2b6d489fe6b1aaa1d94066c66"
     },
     {
       "path": "zero-one-connection.js",
-      "sha256": "86f5cdc2ab0f41ce8b9d1ad991812c2d4e96996d9c1631a444b40d405761d79c"
+      "sha256": "75fd15f47ddd54abbceb21ae95ccff7dc139c8245d761d3d1f7be83f8594957c"
     },
     {
       "path": "zero-one-update.css",
-      "sha256": "2a6190eaca327285fcf5bbe8662ca899f49bb5683a9938eaba50b3c22cbfebe9"
+      "sha256": "56caba661c2b1da58ab01628bdcc307179730e320422f5763c340ec463bc663e"
     },
     {
       "path": "zero-one-update.js",
-      "sha256": "2336bbd47e13f87ade4fb00307adec93261835c30ba6305a40d29d9641bf78af"
+      "sha256": "d0e7ce103bb719f7ccf023ff71380123346df74c3d7751a9ccca9a40ec143cd2"
     }
   ]
 }
