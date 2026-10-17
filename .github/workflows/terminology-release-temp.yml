@@ -1,0 +1,45 @@
+name: Temporary terminology audio and release generation
+on:
+  push:
+    branches:
+      - feature/expand-youth-coaching-terms-20261017
+permissions:
+  contents: write
+concurrency:
+  group: terminology-data-20261017
+  cancel-in-progress: true
+jobs:
+  generate:
+    runs-on: windows-2025
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Create audio manifest for all dictionary entries
+        run: node scripts/prepare-audio.cjs
+      - name: Generate native English PCM WAV for new entries
+        shell: pwsh
+        run: powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/generate-audio.ps1
+      - name: Rebuild safe update manifest and index
+        run: node scripts/build-update-release.mjs
+      - name: Verify dictionary, audio and learning data compatibility
+        run: node --test tests/terminology-expansion.test.cjs tests/speech.test.cjs tests/learning.test.cjs tests/diagrams.test.cjs
+      - name: Verify release integrity
+        run: node scripts/build-update-release.mjs --check
+      - name: Commit generated WAV files and safe update metadata
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add audio/ audio-manifest.js app-version.json index.html
+          git diff --cached --check
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m "Generate spoken audio and safe release for 24 new terms"
+            git push origin HEAD:feature/expand-youth-coaching-terms-20261017
+            if ($LASTEXITCODE -ne 0) { throw "git push failed" }
+          }
