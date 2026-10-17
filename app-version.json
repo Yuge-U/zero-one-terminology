@@ -2,7 +2,7 @@
   "schema": 1,
   "app": "TERMINOLOGY",
   "version": "1.0.0",
-  "buildId": "e534bc04e9be2c9849762c47b70d903d55e0d10e659c6678b0f60328ea6d33a0",
+  "buildId": "6db2a6e88e5da1a1fd8b61518b1ddf990648d66dbc807823b4544d11c8688220",
   "files": [
     {
       "path": "apple-touch-zero-one-180-20261007m.png",
@@ -42,7 +42,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "60e25a46471e2416dfb837b7e85ac4932975ace1d291dfdd4d3334360c1ddd19"
+      "sha256": "feeb8ba600d212acff807b98b776e46d14ad677d313033ef1aac09aa5e6b25ff"
     },
     {
       "path": "learning-model.js",
@@ -94,7 +94,7 @@
     },
     {
       "path": "terms.json",
-      "sha256": "6991a5d941a33e4ed674ea241ce79bfc2bb360d60ee639cd8b750026d2b49653"
+      "sha256": "3312018cb09a50fe9e21b2a5e56ea2613a115551b375605e72c4a416e8d710c5"
     },
     {
       "path": "vendor/msal-browser.min.js",
