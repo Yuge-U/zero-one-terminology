@@ -2,7 +2,7 @@
   "schema": 1,
   "app": "TERMINOLOGY",
   "version": "1.0.0",
-  "buildId": "2a14475de6f8a7429b594353ce2bb30e92abac581cf43b4a0c5c5cfdcbbc0c9d",
+  "buildId": "6db2a6e88e5da1a1fd8b61518b1ddf990648d66dbc807823b4544d11c8688220",
   "files": [
     {
       "path": "apple-touch-zero-one-180-20261007m.png",
@@ -10,7 +10,7 @@
     },
     {
       "path": "audio-manifest.js",
-      "sha256": "1dbf4d93a63ee6bfbb7b722229b7491a3e5176992237d26732b4045136769220"
+      "sha256": "32df208854ead13808a97ffbb481bd7215dcfaa3ca0256c37b205d7581703c69"
     },
     {
       "path": "brand-entry.js",
@@ -26,7 +26,7 @@
     },
     {
       "path": "english.json",
-      "sha256": "a1b87932d4f9528092b0620776ddb0ebee61f8c3a074dad5e882b63bf235d1bf"
+      "sha256": "90dd01e124b6be47c8a2b0af15c03ac96e6da2475f8b054fb9368534e998515e"
     },
     {
       "path": "favicon-terminology-20261007f.ico",
@@ -42,7 +42,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "cb2b48b25f0957ceef68dd5a9bd6a53a5303d3fc9075ba9154ac80178c8e27ba"
+      "sha256": "feeb8ba600d212acff807b98b776e46d14ad677d313033ef1aac09aa5e6b25ff"
     },
     {
       "path": "learning-model.js",
@@ -94,7 +94,7 @@
     },
     {
       "path": "terms.json",
-      "sha256": "64c684f6e7b9783cd70df918269efb09cb904345252c3245236363e1ed643504"
+      "sha256": "3312018cb09a50fe9e21b2a5e56ea2613a115551b375605e72c4a416e8d710c5"
     },
     {
       "path": "vendor/msal-browser.min.js",
